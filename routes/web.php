@@ -2,11 +2,8 @@
 
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BerkasController;
 use App\Http\Controllers\DiskonController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KaryawanController;
-use App\Http\Controllers\KasirController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
@@ -38,33 +35,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/', [HomeController::class, 'index'])->name('home');
-
-    //kasir
-    Route::get('kasir', [KasirController::class, 'index'])->name('kasir');
-    Route::get('getInput', [KasirController::class, 'getInput'])->name('getInput');
-    Route::post('addPelanggan', [KasirController::class, 'addPelanggan'])->name('addPelanggan');
-    Route::get('getAntrian', [KasirController::class, 'getAntrian'])->name('getAntrian');
-    Route::get('getSelesai', [KasirController::class, 'getSelesai'])->name('getSelesai');
-    Route::get('deletePelanggan/{id}', [KasirController::class, 'deletePelanggan'])->name('deletePelanggan');
-    Route::get('getTambahPesanan', [KasirController::class, 'getTambahPesanan'])->name('getTambahPesanan');
-    Route::post('checkout', [KasirController::class, 'checkout'])->name('checkout');
-    Route::get('getDeatailPesanan/{invoice_id}', [KasirController::class, 'getDeatailPesanan'])->name('getDeatailPesanan');
-    Route::get('printNota', [KasirController::class, 'printNota'])->name('printNota');
-    Route::post('refundInvoice', [KasirController::class, 'refundInvoice'])->name('refundInvoice');
-    //end kasir
-
-    //laporan
-    Route::get('laporanPenjualan', [LaporanController::class, 'laporanPenjualan'])->name('laporanPenjualan');
-    Route::get('detailLaporanPenjualan/{tgl}', [LaporanController::class, 'detailLaporanPenjualan'])->name('detailLaporanPenjualan');
-
-    Route::get('laporanRefund', [LaporanController::class, 'laporanRefund'])->name('laporanRefund');
-    Route::get('TerimaRefund/{id}', [LaporanController::class, 'TerimaRefund'])->name('TerimaRefund');
-    Route::get('tolakRefund/{id}', [LaporanController::class, 'tolakRefund'])->name('tolakRefund');
-    //laporan
-
-
     Route::middleware('hakakses:1')->group(function () {
+        //laporan
+        Route::get('/', [LaporanController::class, 'laporanPenjualan'])->name('laporanPenjualan');
+        Route::get('detailLaporanPenjualan/{tgl}', [LaporanController::class, 'detailLaporanPenjualan'])->name('detailLaporanPenjualan');
+
+        Route::get('laporanRefund', [LaporanController::class, 'laporanRefund'])->name('laporanRefund');
+        Route::get('TerimaRefund/{id}', [LaporanController::class, 'TerimaRefund'])->name('TerimaRefund');
+        Route::get('tolakRefund/{id}', [LaporanController::class, 'tolakRefund'])->name('tolakRefund');
+        //laporan
         Route::get('user', [UserController::class, 'index'])->name('user');
         Route::get('get-data-user', [UserController::class, 'getDataUser'])->name('getDataUser');
         Route::post('edit-user', [UserController::class, 'editUser'])->name('editUser');
