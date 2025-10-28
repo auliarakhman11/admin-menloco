@@ -4,6 +4,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DiskonController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\KasirController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
@@ -34,6 +35,21 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::middleware('auth')->group(function () {
+
+    //kasir
+    Route::get('kasir', [KasirController::class, 'index'])->name('kasir');
+    Route::get('getInput', [KasirController::class, 'getInput'])->name('getInput');
+    Route::post('addPelanggan', [KasirController::class, 'addPelanggan'])->name('addPelanggan');
+    Route::get('getAntrian', [KasirController::class, 'getAntrian'])->name('getAntrian');
+    Route::get('getSelesai', [KasirController::class, 'getSelesai'])->name('getSelesai');
+    Route::get('deletePelanggan/{id}', [KasirController::class, 'deletePelanggan'])->name('deletePelanggan');
+    Route::get('getTambahPesanan', [KasirController::class, 'getTambahPesanan'])->name('getTambahPesanan');
+    Route::post('checkout', [KasirController::class, 'checkout'])->name('checkout');
+    Route::get('getDeatailPesanan/{invoice_id}', [KasirController::class, 'getDeatailPesanan'])->name('getDeatailPesanan');
+    Route::get('printNota', [KasirController::class, 'printNota'])->name('printNota');
+    Route::post('refundInvoice', [KasirController::class, 'refundInvoice'])->name('refundInvoice');
+    //end kasir
+
 
     Route::middleware('hakakses:1')->group(function () {
         //laporan
