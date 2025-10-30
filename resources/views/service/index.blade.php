@@ -33,6 +33,7 @@
                                         <th>#</th>
                                         <th>Service</th>
                                         <th>Harga</th>
+                                        <th>Pembagian Hasil</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -45,6 +46,17 @@
                                             <td>{{ $i++ }}</td>
                                             <td>{{ $d->nm_service }}</td>
                                             <td>{{ number_format($d->harga, 0) }}</td>
+                                            <td>
+                                                @if ($d->pembagian > 100)
+                                                    Rp. {{ $d->pembagian }}
+                                                @else
+                                                    @if ($d->pembagian == 0)
+                                                        -
+                                                    @else
+                                                        {{ $d->pembagian }}%
+                                                    @endif
+                                                @endif
+                                            </td>
                                             <td>
                                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
                                                     data-bs-target="#modal_edit_service{{ $d->id }}"><i
@@ -119,6 +131,13 @@
                                 </div>
                             </div>
 
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label for="">Pembagian Hasil</label>
+                                    <input type="text" name="pembagian" class="form-control" value="0" required>
+                                </div>
+                            </div>
+
 
                         </div>
                     </div>
@@ -161,6 +180,14 @@
                                         <label for="">Harga</label>
                                         <input type="number" name="harga" value="{{ $d->harga }}"
                                             class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Pembagian Hasil</label>
+                                        <input type="text" name="pembagian" class="form-control"
+                                            value="{{ $d->pembagian }}" required>
                                     </div>
                                 </div>
 

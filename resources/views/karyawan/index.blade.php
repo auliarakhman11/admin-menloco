@@ -137,12 +137,12 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 mb-2">
+                            {{-- <div class="col-12 mb-2">
                                 <div class="form-group">
                                     <label for="">Pembagian Hasil</label>
                                     <input type="text" name="pembagian" class="form-control" value="0" required>
                                 </div>
-                            </div>
+                            </div> --}}
 
 
                         </div>
@@ -204,13 +204,13 @@
                                     </div>
                                 </div>
 
-                                <div class="col-12 mb-2">
+                                {{-- <div class="col-12 mb-2">
                                     <div class="form-group">
                                         <label for="">Pembagian Hasil</label>
                                         <input type="text" name="pembagian" class="form-control"
                                             value="{{ $d->pembagian }}" required>
                                     </div>
-                                </div>
+                                </div> --}}
 
 
                             </div>

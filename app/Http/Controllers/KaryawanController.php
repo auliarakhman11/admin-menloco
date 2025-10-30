@@ -24,7 +24,7 @@ class KaryawanController extends Controller
             'alamat' => $request->alamat,
             'tgl_masuk' => $request->tgl_masuk,
             'no_tlp' => $request->no_tlp,
-            'pembagian' => $request->pembagian,
+            'pembagian' => 0,
             'void' => 0
         ]);
 
@@ -39,7 +39,7 @@ class KaryawanController extends Controller
             'alamat' => $request->alamat,
             'tgl_masuk' => $request->tgl_masuk,
             'no_tlp' => $request->no_tlp,
-            'pembagian' => $request->pembagian,
+            'pembagian' => 0,
         ]);
 
         return redirect()->back()->with('success', 'Data karyawan berhasil diubah');
