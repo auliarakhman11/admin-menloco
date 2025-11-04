@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DiskonController;
+use App\Http\Controllers\JurnalController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\LaporanController;
@@ -84,6 +85,11 @@ Route::middleware('auth')->group(function () {
         Route::post('addDiskon', [DiskonController::class, 'addDiskon'])->name('addDiskon');
         Route::patch('editDiskon', [DiskonController::class, 'editDiskon'])->name('editDiskon');
         //end diskon
+
+        //jurnal
+        Route::get('pengeluaran', [JurnalController::class, 'pengeluaran'])->name('pengeluaran');
+        //end jurnal
+
     });
 
 

@@ -154,7 +154,7 @@
 
               <p class="text-center">
                 
-                <a href="{{ route('kasir') }}">
+                <a href="{{ route('laporanPenjualan') }}">
                   <span>Kembali</span>
                 </a>
                 
