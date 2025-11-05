@@ -88,6 +88,9 @@ Route::middleware('auth')->group(function () {
 
         //jurnal
         Route::get('pengeluaran', [JurnalController::class, 'pengeluaran'])->name('pengeluaran');
+        Route::post('addPengeluaran', [JurnalController::class, 'addPengeluaran'])->name('addPengeluaran');
+        Route::patch('editPengeluaran', [JurnalController::class, 'editPengeluaran'])->name('editPengeluaran');
+        Route::get('deletePengeluaran/{id}', [JurnalController::class, 'deletePengeluaran'])->name('deletePengeluaran');
         //end jurnal
 
     });

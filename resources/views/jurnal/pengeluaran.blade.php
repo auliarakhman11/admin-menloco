@@ -40,13 +40,16 @@
                                 </div>
 
                                 <div class="col-4 col-md-2">
-                                    <button type="submit" class="btn btn-sm btn-primary mt-4"><i class='bx bx-search'></i>
+                                    <button type="submit" class="btn btn-sm btn-primary mt-4 float-end"><i
+                                            class='bx bx-search'></i>
                                     </button>
                                 </div>
                             </div>
                         </form>
                         <div class="row">
-                            <div class="col-12"></div>
+                            <div class="col-12"><button type="button" class="btn btn-sm btn-primary float-end"
+                                    data-bs-toggle="modal" data-bs-target="#modal_add_pengeluaran"><i
+                                        class='bx bxs-plus-circle'></i> Tambah Data</button></div>
                         </div>
 
 
@@ -84,13 +87,13 @@
                                             <td>{{ $d->ket }}</td>
                                             <td>{{ $d->user->name }}</td>
                                             <td>
-                                                <button type="button"
-                                                    class="btn btn-sm btn-primary detail_laporan_penjualan"
-                                                    data-bs-toggle="modal" data-bs-target="#modal_detail_laporan_penjualan"
+                                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#modal_edit_pengeluaran{{ $d->id }}"
                                                     tgl="{{ $d->tgl }}"><i class="bx bx-edit"></i>
                                                 </button>
-                                                <a href="" class="btn btn-sm btn-primary"><i
-                                                        class="bx bx-trash"></i></a>
+                                                <a href="{{ route('deletePengeluaran', $d->id) }}"
+                                                    onclick="return confirm('Apakah anda yakin ingin menghapus data?');"
+                                                    class="btn btn-sm btn-primary"><i class="bx bx-trash"></i></a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -141,41 +144,133 @@
     <!-- Modal -->
 
 
-    <div class="modal fade" id="modal_detail_laporan_penjualan" tabindex="-1"
-        aria-labelledby="modal_detail_laporan_penjualanLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modal_detail_laporan_penjualanLabel">Detail Laporan Penjualan</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="table_detail_laporan_penjualan">
+    <form id="form_add_pengeluraan" method="POST" action="{{ route('addPengeluaran') }}">
+        @csrf
+        <div class="modal fade" id="modal_add_pengeluaran" tabindex="-1" aria-labelledby="modal_add_pengeluaranLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modal_add_pengeluaranLabel">Tambah Data</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label for="">Tanggal</label>
+                                    <input type="date" name="tgl" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label for="">Akun</label>
+                                    <select name="akun_id" class="form-control" required>
+                                        <option value="">Pilih Akun</option>
+                                        @foreach ($akun as $a)
+                                            <option value="{{ $a->id }}">{{ $a->nm_akun }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label for="">Jumlah</label>
+                                    <input type="number" name="jumlah" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label for="">Keterangan</label>
+                                    <input type="text" name="ket" class="form-control" required>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="btn_add_karyawan">Save</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 
-    <div class="modal fade" id="modal_detail_penjualan" tabindex="-1" aria-labelledby="modal_detail_penjualanLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modal_detail_penjualanLabel">Detail Laporan Penjualan</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="table_detail_penjualan">
+    @foreach ($jurnal as $d)
+        <form method="POST" action="{{ route('editPengeluaran') }}">
+            @csrf
+            @method('patch')
+            <div class="modal fade" id="modal_edit_pengeluaran{{ $d->id }}" tabindex="-1"
+                aria-labelledby="modal_add_pengeluaranLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Data</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <input type="hidden" name="id" value="{{ $d->id }}">
+
+                                <div class="col-12 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Tanggal</label>
+                                        <input type="date" name="tgl" value="{{ $d->tgl }}"
+                                            class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Akun</label>
+                                        <select name="akun_id" class="form-control" required>
+                                            @foreach ($akun as $a)
+                                                <option value="{{ $a->id }}"
+                                                    {{ $a->id == $d->akun_id ? 'selected' : '' }}>{{ $a->nm_akun }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-12 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Jumlah</label>
+                                        <input type="number" name="jumlah" value="{{ $d->jumlah }}"
+                                            class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Keterangan</label>
+                                        <input type="text" name="ket" value="{{ $d->ket }}"
+                                            class="form-control" required>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Edit</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </form>
+    @endforeach
 
 
 
@@ -226,6 +321,14 @@
                 title: ' Ada data yang tidak sesuai, periksa kembali'
             });
             <?php endif; ?>
+
+            $(document).on('submit', '#form_add_pengeluraan', function(event) {
+
+                $('#btn_add_karyawan').attr('disabled', true);
+                $('#btn_add_karyawan').html('Loading..');
+
+
+            });
 
 
 
