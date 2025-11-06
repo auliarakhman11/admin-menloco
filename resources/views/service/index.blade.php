@@ -32,6 +32,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Service</th>
+                                        <th>Jenis</th>
                                         <th>Harga</th>
                                         <th>Pembagian Hasil</th>
                                         <th>Aksi</th>
@@ -45,6 +46,7 @@
                                         <tr>
                                             <td>{{ $i++ }}</td>
                                             <td>{{ $d->nm_service }}</td>
+                                            <td>{{ $d->jenis == 1 ? 'Service' : 'Produk' }}</td>
                                             <td>{{ number_format($d->harga, 0) }}</td>
                                             <td>
                                                 @if ($d->pembagian > 100)
@@ -126,6 +128,16 @@
 
                             <div class="col-12 mb-2">
                                 <div class="form-group">
+                                    <label for="">Jenis</label>
+                                    <select name="jenis" class="form-control" required>
+                                        <option value="1">Service</option>
+                                        <option value="2">Produk</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
                                     <label for="">Harga</label>
                                     <input type="number" name="harga" class="form-control" required>
                                 </div>
@@ -172,6 +184,16 @@
                                         <label for="">Nama Service</label>
                                         <input type="text" name="nm_service" value="{{ $d->nm_service }}"
                                             class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Jenis</label>
+                                        <select name="jenis" class="form-control" required>
+                                            <option value="1" {{ $d->jenis == 1 ? 'selected' : '' }}>Service</option>
+                                            <option value="2" {{ $d->jenis == 2 ? 'selected' : '' }}>Produk</option>
+                                        </select>
                                     </div>
                                 </div>
 

@@ -19,6 +19,7 @@ class ServiceController extends Controller
     {
         Service::create([
             'nm_service' => $request->nm_service,
+            'jenis' => $request->jenis,
             'harga' => $request->harga,
             'pembagian' => $request->pembagian,
             'void' => 0
@@ -31,6 +32,7 @@ class ServiceController extends Controller
     {
         Service::where('id', $request->id)->update([
             'nm_service' => $request->nm_service,
+            'jenis' => $request->jenis,
             'harga' => $request->harga,
             'pembagian' => $request->pembagian,
         ]);

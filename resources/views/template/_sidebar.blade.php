@@ -58,12 +58,18 @@
 
                 </ul>
             </li>
-            <li class="menu-item {{ Request::is(['pengeluaran']) ? 'active open' : '' }}">
+            <li class="menu-item {{ Request::is(['pengeluaran','dashboard']) ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-calculator'></i>
                     <div data-i18n="Accounting">Accounting</div>
                 </a>
                 <ul class="menu-sub">
+
+                  <li class="menu-item {{ Request::is('dashboard') ? 'active' : '' }}">
+                        <a href="{{ route('dashboard') }}" class="menu-link">
+                            <div data-i18n="Dashboard">Dashboard</div>
+                        </a>
+                    </li>
 
                     <li class="menu-item {{ Request::is('pengeluaran') ? 'active' : '' }}">
                         <a href="{{ route('pengeluaran') }}" class="menu-link">
