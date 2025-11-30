@@ -58,7 +58,8 @@
 
                 </ul>
             </li>
-            <li class="menu-item {{ Request::is(['pengeluaran', 'dashboard', 'kasbon']) ? 'active open' : '' }}">
+            <li
+                class="menu-item {{ Request::is(['pengeluaran', 'dashboard', 'kasbon', 'ambilGaji']) ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-calculator'></i>
                     <div data-i18n="Accounting">Accounting</div>

@@ -57,27 +57,31 @@
                                 $ttl_kapster += $d['ttl_kapster'];
                             }
                         @endphp
-                        
-                        <table class="table table-sm table-bordered mt-3">
-                            <thead>
-                                <tr class="text-center">
-                                    <th>Pemasukan</th>
-                                    <th>Pengeluaran</th>
-                                    <th>Saldo Kas</th>
-                                    <th>Men Loco</th>
-                                    <th>Kapster</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="text-center">
-                                    <td>{{ number_format($total_penjualan,0) }}</td>
-                                    <td>{{ number_format(($jurnal ? $jurnal->jml_pengeluaran : 0) ,0) }}</td>
-                                    <td>{{ number_format($total_penjualan - ($jurnal ? $jurnal->jml_pengeluaran : 0),0) }}</td>
-                                    <td>{{ number_format($total_penjualan - ($jurnal ? $jurnal->jml_pengeluaran : 0) - $ttl_kapster,0) }}</td>
-                                    <td>{{ number_format($ttl_kapster,0) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mt-3">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th>Pemasukan</th>
+                                        <th>Pengeluaran</th>
+                                        <th>Saldo Kas</th>
+                                        <th>Men Loco</th>
+                                        <th>Kapster</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="text-center">
+                                        <td>{{ number_format($total_penjualan, 0) }}</td>
+                                        <td>{{ number_format($jurnal ? $jurnal->jml_pengeluaran : 0, 0) }}</td>
+                                        <td>{{ number_format($total_penjualan - ($jurnal ? $jurnal->jml_pengeluaran : 0), 0) }}
+                                        </td>
+                                        <td>{{ number_format($total_penjualan - ($jurnal ? $jurnal->jml_pengeluaran : 0) - $ttl_kapster, 0) }}
+                                        </td>
+                                        <td>{{ number_format($ttl_kapster, 0) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
 
                     </div>
@@ -90,102 +94,178 @@
 
                 </div>
 
-                <div class="card">
+                <div class="card mt-3">
                     <div class="card-body">
-                        <table class="table table-sm table-bordered">
-                            <thead>
-                                <tr>
-                                    <th colspan="3">Persentasi Pemasukan</th>
-                                    <th>Men Loco</th>
-                                    <th>Kapster</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                    $ttl_penjualan = 0;
-                                    $ttl_menloco = 0;
-                                    $ttl_kapster = 0;
-                                    $ttl_persen = 0;
-                                @endphp
-                                @foreach ($dt_kepster as $d)
-                                @php
-                                    $ttl_penjualan += $d['ttl_penjualan'] - $d['ttl_diskon'];
-                                    $ttl_menloco += ($d['ttl_penjualan'] - $d['ttl_diskon']) - $d['ttl_kapster'];
-                                    $ttl_kapster += $d['ttl_kapster'];
-                                @endphp
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead>
                                     <tr>
-                                        <td>{{ $d['nm_karyawan'] }}</td>
-                                        <td>{{ number_format($d['ttl_penjualan'] - $d['ttl_diskon'],0) }}</td>
+                                        <th colspan="3">Persentasi Pemasukan</th>
+                                        <th>Men Loco</th>
+                                        <th>Kapster</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $ttl_penjualan = 0;
+                                        $ttl_menloco = 0;
+                                        $ttl_kapster = 0;
+                                        $ttl_persen = 0;
+                                    @endphp
+                                    @foreach ($dt_kepster as $d)
                                         @php
-                                            $persen = $total_penjualan > 0 && ($d['ttl_penjualan'] - $d['ttl_diskon']) > 0 ? ($d['ttl_penjualan'] - $d['ttl_diskon']) / $total_penjualan * 100 : 0;
-                                            $ttl_persen += $persen;
+                                            $ttl_penjualan += $d['ttl_penjualan'] - $d['ttl_diskon'];
+                                            $ttl_menloco += $d['ttl_penjualan'] - $d['ttl_diskon'] - $d['ttl_kapster'];
+                                            $ttl_kapster += $d['ttl_kapster'];
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $d['nm_karyawan'] }}</td>
+                                            <td>{{ number_format($d['ttl_penjualan'] - $d['ttl_diskon'], 0) }}</td>
+                                            @php
+                                                $persen =
+                                                    $total_penjualan > 0 && $d['ttl_penjualan'] - $d['ttl_diskon'] > 0
+                                                        ? (($d['ttl_penjualan'] - $d['ttl_diskon']) /
+                                                                $total_penjualan) *
+                                                            100
+                                                        : 0;
+                                                $ttl_persen += $persen;
+                                            @endphp
+                                            <td>
+                                                <div class="progress">
+                                                    <div class="progress-bar" role="progressbar"
+                                                        style="width: {{ number_format($persen, 2) }}%;"
+                                                        aria-valuenow="{{ number_format($persen, 2) }}" aria-valuemin="0"
+                                                        aria-valuemax="100">{{ number_format($persen, 2) }}%</div>
+                                                </div>
+                                            </td>
+                                            <td>{{ number_format($d['ttl_penjualan'] - $d['ttl_diskon'] - $d['ttl_kapster'], 0) }}
+                                            </td>
+                                            <td>{{ number_format($d['ttl_kapster'], 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                    <tr>
+                                        <td>Produk</td>
+                                        <td>{{ number_format($ttl_penjualan_produk, 0) }}</td>
+                                        @php
+                                            $persen_barang =
+                                                $ttl_penjualan_produk > 0 && $total_penjualan > 0
+                                                    ? ($ttl_penjualan_produk / $total_penjualan) * 100
+                                                    : 0;
+                                            $ttl_persen += $persen_barang;
                                         @endphp
                                         <td>
                                             <div class="progress">
-                                                <div class="progress-bar" role="progressbar" style="width: {{ number_format($persen,2) }}%;" aria-valuenow="{{ number_format($persen,2) }}" aria-valuemin="0" aria-valuemax="100">{{ number_format($persen,2) }}%</div>
+                                                <div class="progress-bar" role="progressbar"
+                                                    style="width: {{ number_format($persen_barang, 2) }}%;"
+                                                    aria-valuenow="{{ number_format($persen_barang, 2) }}"
+                                                    aria-valuemin="0" aria-valuemax="100">
+                                                    {{ number_format($persen_barang, 2) }}%</div>
                                             </div>
                                         </td>
-                                        <td>{{ number_format(($d['ttl_penjualan'] - $d['ttl_diskon']) - $d['ttl_kapster'],0) }}</td>
-                                        <td>{{ number_format($d['ttl_kapster'],0) }}</td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
-                                @endforeach
-                                <tr>
-                                    <td>Produk</td>
-                                    <td>{{ number_format($ttl_penjualan_produk,0) }}</td>
-                                    @php
-                                        $persen_barang = $ttl_penjualan_produk > 0 && $total_penjualan > 0 ? $ttl_penjualan_produk / $total_penjualan * 100 : 0;
-                                        $ttl_persen += $persen_barang;
-                                    @endphp
-                                    <td>
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: {{ number_format($persen_barang,2) }}%;" aria-valuenow="{{ number_format($persen_barang,2) }}" aria-valuemin="0" aria-valuemax="100">{{ number_format($persen_barang,2) }}%</div>
-                                        </div>
-                                    </td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td><b>Total</b></td>
-                                    <td><b>{{ number_format($ttl_penjualan + $ttl_penjualan_produk,0) }}</b></td>
-                                    <td>
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: {{ number_format($ttl_persen,2) }}%;" aria-valuenow="{{ number_format($ttl_persen,2) }}" aria-valuemin="0" aria-valuemax="100">{{ number_format($ttl_persen,2) }}%</div>
-                                        </div>
-                                    </td>
-                                    <td><b>{{ number_format($ttl_menloco,0) }}</b></td>
-                                    <td><b>{{ number_format($ttl_kapster,0) }}</b></td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td><b>Total</b></td>
+                                        <td><b>{{ number_format($ttl_penjualan + $ttl_penjualan_produk, 0) }}</b></td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar"
+                                                    style="width: {{ number_format($ttl_persen, 2) }}%;"
+                                                    aria-valuenow="{{ number_format($ttl_persen, 2) }}" aria-valuemin="0"
+                                                    aria-valuemax="100">{{ number_format($ttl_persen, 2) }}%</div>
+                                            </div>
+                                        </td>
+                                        <td><b>{{ number_format($ttl_menloco, 0) }}</b></td>
+                                        <td><b>{{ number_format($ttl_kapster, 0) }}</b></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card mt-3">
                     <div class="card-body">
-                        <table class="table table-sm table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Service</th>
-                                    @foreach ($karyawan as $k)
-                                        <th>{{ $k->karyawan->nama }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($dt_service_kepster as $d)
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead>
                                     <tr>
-                                        <td>{{ $d['nm_service'] }}</td>
-                                        @foreach ($d['kapster'] as $k)
-                                            <td>{{ $k }}</td>
-                                        @endforeach
+                                        <th>Kapster</th>
+                                        <th>Pendapatan</th>
+                                        <th>Piutang</th>
+                                        <th>Sudah Diserahkan</th>
+                                        <th>Saldo</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $tot_pendapatan = 0;
+                                        $tot_kasbon = 0;
+                                        $tot_ambil_gaji = 0;
+                                        $tot_saldo = 0;
+                                    @endphp
+                                    @foreach ($saldo_karyawan as $d)
+                                        @php
+                                            $tot_pendapatan += $d->ttl_harga;
+                                            $tot_kasbon += $d->ttl_kasbon;
+                                            $tot_ambil_gaji += $d->ttl_ambil_gaji;
+                                            $tot_saldo += $d->ttl_harga - $d->ttl_kasbon - $d->ttl_ambil_gaji;
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $d->nama }}</td>
+                                            <td>{{ number_format($d->ttl_harga, 0) }}</td>
+                                            <td>{{ number_format($d->ttl_kasbon, 0) }}</td>
+                                            <td>{{ number_format($d->ttl_ambil_gaji, 0) }}</td>
+                                            <td>{{ number_format($d->ttl_harga - $d->ttl_kasbon - $d->ttl_ambil_gaji, 0) }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td><b>Total</b></td>
+                                        <td><b>{{ number_format($tot_pendapatan, 0) }}</b></td>
+                                        <td><b>{{ number_format($tot_kasbon, 0) }}</b></td>
+                                        <td><b>{{ number_format($tot_ambil_gaji, 0) }}</b></td>
+                                        <td><b>{{ number_format($tot_saldo, 0) }}</b></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        @foreach ($karyawan as $k)
+                                            <th>{{ $k->karyawan->nama }}</th>
+                                        @endforeach
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($dt_service_kepster as $d)
+                                        <tr>
+                                            <td>{{ $d['nm_service'] }}</td>
+                                            @foreach ($d['kapster'] as $k)
+                                                <td>{{ $k }}</td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
 
 
 

@@ -5,16 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Akun;
 use App\Models\Invoice;
 use App\Models\Jurnal;
+use App\Models\Karyawan;
 use App\Models\Penjualan;
 use App\Models\PenjualanKaryawan;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class JurnalController extends Controller
 {
 
-    public function dashboard(Request $request){
+    public function dashboard(Request $request)
+    {
         if ($request->query('tgl1')) {
             $tgl1 = $request->query('tgl1');
             $tgl2 = $request->query('tgl2');
@@ -30,10 +33,10 @@ class JurnalController extends Controller
         $data_penjuaalan = [];
 
         $total_penjualan = 0;
-        
+
         foreach ($periode as $pr) {
 
-            $dt_penjualan = $penjualan->where('tgl',$pr->tgl)->first();
+            $dt_penjualan = $penjualan->where('tgl', $pr->tgl)->first();
 
             $data_periode[] =  date("d/m/Y", strtotime($pr->tgl));
             $data_penjuaalan[] =  $dt_penjualan ? ($dt_penjualan->ttl_penjualan - $dt_penjualan->ttl_diskon) : 0;
@@ -60,15 +63,15 @@ class JurnalController extends Controller
         $dtc = json_encode($data_c);
 
         $karyawan = PenjualanKaryawan::select('karyawan_id')->selectRaw("SUM(harga) as ttl_kapster")->where('tgl', '>=', $tgl1)->where('tgl', '<=', $tgl2)->where('void', 0)->groupBy('karyawan_id')->with('karyawan')->get();
-        $penjualan = Penjualan::select('penjualan_karyawan.karyawan_id','service.jenis','penjualan.qty','penjualan.service_id')->selectRaw("SUM(penjualan.qty * penjualan.harga) as ttl_penjualan")->leftJoin('service','penjualan.service_id','=','service.id')->leftJoin('penjualan_karyawan','penjualan.invoice_id','=','penjualan_karyawan.invoice_id')->where('penjualan.tgl', '>=', $tgl1)->where('penjualan.tgl', '<=', $tgl2)->where('penjualan.void', 0)->groupBy('penjualan.id')->get();
-        $invoice = Invoice::select('penjualan_karyawan.karyawan_id','invoice.id')->selectRaw("SUM(invoice.total) as ttl_invoice, SUM(invoice.diskon) as ttl_diskon")->leftJoin('penjualan_karyawan','invoice.id','=','penjualan_karyawan.invoice_id')->where('invoice.tgl', '>=', $tgl1)->where('invoice.tgl', '<=', $tgl2)->where('invoice.void', 0)->groupBy('invoice.id')->get();
+        $penjualan = Penjualan::select('penjualan_karyawan.karyawan_id', 'service.jenis', 'penjualan.qty', 'penjualan.service_id')->selectRaw("SUM(penjualan.qty * penjualan.harga) as ttl_penjualan")->leftJoin('service', 'penjualan.service_id', '=', 'service.id')->leftJoin('penjualan_karyawan', 'penjualan.invoice_id', '=', 'penjualan_karyawan.invoice_id')->where('penjualan.tgl', '>=', $tgl1)->where('penjualan.tgl', '<=', $tgl2)->where('penjualan.void', 0)->groupBy('penjualan.id')->get();
+        $invoice = Invoice::select('penjualan_karyawan.karyawan_id', 'invoice.id')->selectRaw("SUM(invoice.total) as ttl_invoice, SUM(invoice.diskon) as ttl_diskon")->leftJoin('penjualan_karyawan', 'invoice.id', '=', 'penjualan_karyawan.invoice_id')->where('invoice.tgl', '>=', $tgl1)->where('invoice.tgl', '<=', $tgl2)->where('invoice.void', 0)->groupBy('invoice.id')->get();
 
         $dt_kepster = [];
-        
+
         foreach ($karyawan as $k) {
 
-            $dt_penjualan = $penjualan->where('karyawan_id',$k->karyawan_id)->where('jenis',1)->all();
-            $dt_invoice = $invoice->where('karyawan_id',$k->karyawan_id)->all();
+            $dt_penjualan = $penjualan->where('karyawan_id', $k->karyawan_id)->where('jenis', 1)->all();
+            $dt_invoice = $invoice->where('karyawan_id', $k->karyawan_id)->all();
 
             $ttl_penjualan = 0;
             foreach ($dt_penjualan as $dp) {
@@ -80,7 +83,7 @@ class JurnalController extends Controller
                 $ttl_diskon += $dp->ttl_diskon;
             }
 
-            $dt_kepster [ ] = [
+            $dt_kepster[] = [
                 'nm_karyawan' => $k->karyawan->nama,
                 'ttl_kapster' => $k->ttl_kapster,
                 'ttl_penjualan' => $ttl_penjualan,
@@ -88,29 +91,50 @@ class JurnalController extends Controller
             ];
         }
 
-        $ttl_penjualan_produk = Penjualan::selectRaw("SUM(penjualan.qty * penjualan.harga) as ttl_penjualan")->leftJoin('service','penjualan.service_id','=','service.id')->where('penjualan.tgl', '>=', $tgl1)->where('penjualan.tgl', '<=', $tgl2)->where('penjualan.void', 0)->where('service.jenis',2)->first();
+        $ttl_penjualan_produk = Penjualan::selectRaw("SUM(penjualan.qty * penjualan.harga) as ttl_penjualan")->leftJoin('service', 'penjualan.service_id', '=', 'service.id')->where('penjualan.tgl', '>=', $tgl1)->where('penjualan.tgl', '<=', $tgl2)->where('penjualan.void', 0)->where('service.jenis', 2)->first();
 
-        $service = Service::where('jenis',1)->get();
+        $service = Service::where('jenis', 1)->get();
 
         $dt_service_kepster = [];
 
         foreach ($service as $s) {
             $kapster = [];
             foreach ($karyawan as $k) {
-                $dt_penjualan = $penjualan->where('service_id',$s->id)->where('karyawan_id',$k->karyawan_id)->all();
+                $dt_penjualan = $penjualan->where('service_id', $s->id)->where('karyawan_id', $k->karyawan_id)->all();
                 $tot_penjualan = 0;
                 foreach ($dt_penjualan as $dp) {
                     $tot_penjualan += $dp->qty;
                 }
-                $kapster [] = $tot_penjualan;
+                $kapster[] = $tot_penjualan;
             }
-            
+
 
             $dt_service_kepster[] = [
                 'nm_service' => $s->nm_service,
                 'kapster' => $kapster,
             ];
         }
+
+        $saldo_karyawan = Karyawan::select('karyawan.*')->selectRaw("dt_kasbon.ttl_kasbon, dt_ambil_gaji.ttl_ambil_gaji, dt_penjualan_karyawan.ttl_harga")
+            ->leftJoin(
+                DB::raw("(SELECT karyawan_id, SUM(harga) as ttl_harga FROM penjualan_karyawan WHERE tgl >= '$tgl1' AND tgl <= '$tgl2' AND void = 0 GROUP BY karyawan_id) dt_penjualan_karyawan"),
+                'karyawan.id',
+                '=',
+                'dt_penjualan_karyawan.karyawan_id'
+            )
+            ->leftJoin(
+                DB::raw("(SELECT karyawan_id, SUM(jumlah) as ttl_kasbon FROM kasbon WHERE tgl >= '$tgl1' AND tgl <= '$tgl2' AND void = 0 GROUP BY karyawan_id) dt_kasbon"),
+                'karyawan.id',
+                '=',
+                'dt_kasbon.karyawan_id'
+            )
+            ->leftJoin(
+                DB::raw("(SELECT karyawan_id, SUM(jumlah) as ttl_ambil_gaji FROM ambil_gaji WHERE tgl >= '$tgl1' AND tgl <= '$tgl2' AND void = 0 GROUP BY karyawan_id) dt_ambil_gaji"),
+                'karyawan.id',
+                '=',
+                'dt_ambil_gaji.karyawan_id'
+            )
+            ->where('karyawan.void', 0)->groupBy('karyawan.id')->get();
 
         return view('jurnal.dashboard', [
             'title' => 'Dashboard',
@@ -121,12 +145,12 @@ class JurnalController extends Controller
             'dt_kepster' => $dt_kepster,
             'total_penjualan' => $total_penjualan,
             'ttl_penjualan_produk' => $ttl_penjualan_produk ? $ttl_penjualan_produk->ttl_penjualan : 0,
-            'jurnal' => Jurnal::selectRaw("SUM(jumlah) as jml_pengeluaran")->where('jenis',2)->where('tgl', '>=', $tgl1)->where('tgl', '<=', $tgl2)->where('void', 0)->first(),
+            'jurnal' => Jurnal::selectRaw("SUM(jumlah) as jml_pengeluaran")->where('jenis', 2)->where('tgl', '>=', $tgl1)->where('tgl', '<=', $tgl2)->where('void', 0)->first(),
             'dt_service_kepster' => $dt_service_kepster,
             'karyawan' => $karyawan,
+            'saldo_karyawan' => $saldo_karyawan
 
         ]);
-
     }
 
     public function pengeluaran(Request $request)
