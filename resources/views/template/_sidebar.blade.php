@@ -58,14 +58,14 @@
 
                 </ul>
             </li>
-            <li class="menu-item {{ Request::is(['pengeluaran','dashboard']) ? 'active open' : '' }}">
+            <li class="menu-item {{ Request::is(['pengeluaran', 'dashboard', 'kasbon']) ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-calculator'></i>
                     <div data-i18n="Accounting">Accounting</div>
                 </a>
                 <ul class="menu-sub">
 
-                  <li class="menu-item {{ Request::is('dashboard') ? 'active' : '' }}">
+                    <li class="menu-item {{ Request::is('dashboard') ? 'active' : '' }}">
                         <a href="{{ route('dashboard') }}" class="menu-link">
                             <div data-i18n="Dashboard">Dashboard</div>
                         </a>
@@ -74,6 +74,18 @@
                     <li class="menu-item {{ Request::is('pengeluaran') ? 'active' : '' }}">
                         <a href="{{ route('pengeluaran') }}" class="menu-link">
                             <div data-i18n="Laporan Pengeluaran">Laporan Pengeluaran</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ Request::is('kasbon') ? 'active' : '' }}">
+                        <a href="{{ route('kasbon') }}" class="menu-link">
+                            <div data-i18n="Laporan Piutang">Laporan Piutang</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ Request::is('ambilGaji') ? 'active' : '' }}">
+                        <a href="{{ route('ambilGaji') }}" class="menu-link">
+                            <div data-i18n="Laporan Pendapatan">Laporan Pendapatan</div>
                         </a>
                     </li>
 

@@ -1,10 +1,11 @@
 <?php
 
-
+use App\Http\Controllers\AmbilGajiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DiskonController;
 use App\Http\Controllers\JurnalController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\KasbonController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ServiceController;
@@ -91,9 +92,23 @@ Route::middleware('auth')->group(function () {
         Route::post('addPengeluaran', [JurnalController::class, 'addPengeluaran'])->name('addPengeluaran');
         Route::patch('editPengeluaran', [JurnalController::class, 'editPengeluaran'])->name('editPengeluaran');
         Route::get('deletePengeluaran/{id}', [JurnalController::class, 'deletePengeluaran'])->name('deletePengeluaran');
-        
-        Route::get('dashboard', [JurnalController::class,'dashboard'])->name('dashboard');
+
+        Route::get('dashboard', [JurnalController::class, 'dashboard'])->name('dashboard');
         //end jurnal
+
+        //kasbon
+        Route::get('kasbon', [KasbonController::class, 'index'])->name('kasbon');
+        Route::post('addKasbon', [KasbonController::class, 'addKasbon'])->name('addKasbon');
+        Route::patch('editKasbon', [KasbonController::class, 'editKasbon'])->name('editKasbon');
+        Route::get('deleteKasbon/{id}', [KasbonController::class, 'deleteKasbon'])->name('deleteKasbon');
+        //endkasbon
+
+        //AmbilGaji
+        Route::get('ambilGaji', [AmbilGajiController::class, 'index'])->name('ambilGaji');
+        Route::post('addAmbilGaji', [AmbilGajiController::class, 'addAmbilGaji'])->name('addAmbilGaji');
+        Route::patch('editAmbilGaji', [AmbilGajiController::class, 'editAmbilGaji'])->name('editAmbilGaji');
+        Route::get('deleteAmbilGaji/{id}', [AmbilGajiController::class, 'deleteAmbilGaji'])->name('deleteAmbilGaji');
+        //endAmbilGaji
 
     });
 

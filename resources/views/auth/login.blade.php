@@ -144,8 +144,8 @@
 
     @error('username')
     <div class="alert alert-danger" role="alert">
-                                               {{ $message }}
-                                              </div>
+                                                   {{ $message }}
+                                                  </div>
 @enderror
 
     <?php if(session('success')): ?>
