@@ -3,6 +3,7 @@
 use App\Http\Controllers\AmbilGajiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DiskonController;
+use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\JurnalController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\KasbonController;
@@ -109,6 +110,14 @@ Route::middleware('auth')->group(function () {
         Route::patch('editAmbilGaji', [AmbilGajiController::class, 'editAmbilGaji'])->name('editAmbilGaji');
         Route::get('deleteAmbilGaji/{id}', [AmbilGajiController::class, 'deleteAmbilGaji'])->name('deleteAmbilGaji');
         //endAmbilGaji
+
+        //investor
+        Route::get('investor', [InvestorController::class, 'index'])->name('investor');
+        Route::post('addInvestor', [InvestorController::class, 'addInvestor'])->name('addInvestor');
+        Route::get('deletePersenInvestor/{id}', [InvestorController::class, 'deletePersenInvestor'])->name('deletePersenInvestor');
+        Route::patch('editInvestor', [InvestorController::class, 'editInvestor'])->name('editInvestor');
+
+        //endinvestor
 
     });
 

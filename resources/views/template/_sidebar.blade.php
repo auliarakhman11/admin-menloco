@@ -93,7 +93,8 @@
 
                 </ul>
             </li>
-            <li class="menu-item {{ Request::is(['user', 'service', 'karyawan', 'diskon']) ? 'active open' : '' }}">
+            <li
+                class="menu-item {{ Request::is(['user', 'service', 'karyawan', 'diskon', 'investor']) ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bxs-book-content'></i>
                     <div data-i18n="Data Master">Data Master</div>
@@ -104,6 +105,12 @@
                     <li class="menu-item {{ Request::is('user') ? 'active' : '' }}">
                         <a href="{{ route('user') }}" class="menu-link">
                             <div data-i18n="User">User</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ Request::is('investor') ? 'active' : '' }}">
+                        <a href="{{ route('investor') }}" class="menu-link">
+                            <div data-i18n="Investor">Investor</div>
                         </a>
                     </li>
 

@@ -265,6 +265,63 @@
                     </div>
                 </div>
 
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5>Laporan Investor</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                @php
+                                    $pengeluaran = $jurnal ? $jurnal->jml_pengeluaran : 0;
+                                    $laba = $total_penjualan - $pengeluaran - $ttl_kapster;
+                                @endphp
+                                <tr>
+                                    <td>Pendapatan</td>
+                                    <td>{{ number_format($total_penjualan, 0) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Pengeluran /
+                                        {{ $pengeluaran > 0 && $total_penjualan > 0 ? number_format(($pengeluaran / $total_penjualan) * 100, 2) : 0 }}
+                                        %
+                                    </td>
+                                    <td>{{ number_format($pengeluaran, 0) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Gaji Capster /
+                                        {{ $ttl_kapster > 0 && $total_penjualan > 0 ? number_format(($ttl_kapster / $total_penjualan) * 100, 2) : 0 }}
+                                        %
+                                    </td>
+                                    <td>{{ number_format($ttl_kapster, 0) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Laba /
+                                        {{ $laba > 0 && $total_penjualan > 0 ? number_format(($laba / $total_penjualan) * 100, 2) : 0 }}
+                                        %
+                                    </td>
+                                    <td>{{ number_format($laba, 0) }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-center">Pembagian Investor</td>
+                                </tr>
+                                @if ($laba > 0)
+                                    @foreach ($investor as $in)
+                                        <tr>
+                                            <td>{{ $in->investor->nm_investor }} /
+                                                {{ $in->persen > 0 ? $in->persen : 0 }}%
+                                            </td>
+                                            <td>{{ $in->persen > 0 ? number_format(($laba * $in->persen) / 100, 0) : 0 }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
 
 
 

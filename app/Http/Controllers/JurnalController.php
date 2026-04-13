@@ -8,6 +8,7 @@ use App\Models\Jurnal;
 use App\Models\Karyawan;
 use App\Models\Penjualan;
 use App\Models\PenjualanKaryawan;
+use App\Models\PersenInvestor;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -148,7 +149,8 @@ class JurnalController extends Controller
             'jurnal' => Jurnal::selectRaw("SUM(jumlah) as jml_pengeluaran")->where('jenis', 2)->where('tgl', '>=', $tgl1)->where('tgl', '<=', $tgl2)->where('void', 0)->first(),
             'dt_service_kepster' => $dt_service_kepster,
             'karyawan' => $karyawan,
-            'saldo_karyawan' => $saldo_karyawan
+            'saldo_karyawan' => $saldo_karyawan,
+            'investor' => PersenInvestor::select('persen_investor.*')->with('investor')->get(),
 
         ]);
     }
