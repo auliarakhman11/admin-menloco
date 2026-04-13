@@ -47,7 +47,7 @@
                                             <td>
                                                 @if ($d->persenInvestor)
                                                     @foreach ($d->persenInvestor as $pi)
-                                                        {{ $pi->cabang->nm_cabang }} {{ $pi->persen }}%
+                                                        {{ $pi->cabang->nama }} / {{ $pi->persen }}%
                                                     @endforeach
                                                 @endif
                                             </td>
