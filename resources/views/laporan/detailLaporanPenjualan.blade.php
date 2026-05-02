@@ -7,6 +7,7 @@
                 <th>Waktu Selesai</th>
                 <th>Invoice</th>
                 <th>Customer</th>
+                <th>Kapster</th>
                 <th>Total</th>
                 <th>Aksi</th>
             </tr>
@@ -26,6 +27,13 @@
                     <td>{{ date('d/m/Y H:i', strtotime($d->updated_at)) }}</td>
                     <td>{{ $d->no_invoice }}</td>
                     <td>{{ $d->nm_customer }}</td>
+                    <td>
+                        @if ($d->penjualanKaryawan)
+                            @foreach ($d->penjualanKaryawan as $kr)
+                                {{ $kr->karyawan->nama }} <br>
+                            @endforeach
+                        @endif
+                    </td>
                     <td>{{ number_format($d->total - $d->diskon, 0) }}</td>
                     <td>
                         <button type="button" invoice_id="{{ $d->id }}"
