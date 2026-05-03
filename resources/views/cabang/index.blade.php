@@ -231,17 +231,6 @@
             });
             <?php endif; ?>
 
-            <?php if($errors->any()): ?>
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                icon: 'error',
-                title: ' Ada data yang tidak sesuai, periksa kembali'
-            });
-            <?php endif; ?>
-
 
             $(document).on('submit', '#form_add_data', function(event) {
                 $('#btn_add_data').attr('disabled', true);

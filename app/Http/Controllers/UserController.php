@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AksesCabang;
 use App\Models\AksesMenu;
 use App\Models\AksesProses;
+use App\Models\Cabang;
 use App\Models\JenisUser;
 use App\Models\Menu;
 use App\Models\Proses;
@@ -21,7 +23,8 @@ class UserController extends Controller
     {
         return view('user.index', [
             'title' => 'User',
-            'user' => User::all(),
+            'user' => User::whereIn('role_id', [1, 3])->with('aksesCabang')->get(),
+            'cabang' => Cabang::all(),
         ]);
     }
 
@@ -70,16 +73,27 @@ class UserController extends Controller
         //     return response()->json(['errors'=>$validator->errors()->all()]);
         // }
 
-        $user = User::create([
-            'name' => request('name'),
-            'username' => request('username'),
-            'password' => bcrypt(request('password')),
-            'role_id' => request('role_id'),
-        ]);
+        if (request('cabang_id')) {
+            $user = User::create([
+                'name' => request('name'),
+                'username' => request('username'),
+                'password' => bcrypt(request('password')),
+                'role_id' => request('role_id'),
+            ]);
 
+            $cabang_id = request('cabang_id');
 
+            for ($count = 0; $count < count($cabang_id); $count++) {
+                AksesCabang::create([
+                    'user_id' => $user->id,
+                    'cabang_id' => $cabang_id[$count],
+                ]);
+            }
 
-        return redirect()->back()->with('success', 'Data user berhasil dibuat');
+            return redirect()->back()->with('success', 'Data user berhasil dibuat');
+        } else {
+            return redirect()->back()->with('error', 'Akses Cabang harus diisi');
+        }
     }
 
     public function gantiPassword()
@@ -122,12 +136,28 @@ class UserController extends Controller
 
     public function editUser(Request $request)
     {
-        User::where('id', $request->id)->update([
-            'name' => $request->name,
-            'role_id' => $request->role_id,
-        ]);
+        $cabang_id = $request->cabang_id;
+
+        if ($cabang_id) {
+            User::where('id', $request->id)->update([
+                'name' => $request->name,
+                'role_id' => $request->role_id,
+            ]);
+
+            AksesCabang::where('user_id', $request->id)->delete();
 
 
-        return redirect()->back()->with('success', 'Data user berhasil diubah');
+            for ($count = 0; $count < count($cabang_id); $count++) {
+                AksesCabang::create([
+                    'user_id' => $request->id,
+                    'cabang_id' => $cabang_id[$count],
+                ]);
+            }
+
+
+            return redirect()->back()->with('success', 'Data user berhasil diubah');
+        } else {
+            return redirect()->back()->with('error', 'Akses Cabang harus diisi');
+        }
     }
 }

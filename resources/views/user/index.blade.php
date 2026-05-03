@@ -7,16 +7,16 @@
 
     <style>
         /* .blick {
-                                                background-color: #ed1a3a;
-                                            }
-                                            .blink-soft {
-                                                animation: blinker 1.5s linear infinite;
-                                            }
-                                            @keyframes blinker {
-                                                50% {
-                                                    opacity: 0;
-                                                }
-                                            } */
+                                                                                                                        background-color: #ed1a3a;
+                                                                                                                    }
+                                                                                                                    .blink-soft {
+                                                                                                                        animation: blinker 1.5s linear infinite;
+                                                                                                                    }
+                                                                                                                    @keyframes blinker {
+                                                                                                                        50% {
+                                                                                                                            opacity: 0;
+                                                                                                                        }
+                                                                                                                    } */
 
         .blink {
             animation: blink 1.5s linear infinite;
@@ -84,7 +84,7 @@
                                             <td>{{ $i++ }}</td>
                                             <td>{{ $d->name }}</td>
                                             <td>{{ $d->username }}</td>
-                                            <td>{{ $d->role_id == 1 ? 'Super' : 'Kasir' }}</td>
+                                            <td>{{ $d->role_id == 1 ? 'Super User' : 'Admin' }}</td>
                                             <td><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
                                                     data-bs-target="#modal_edit_user{{ $d->id }}"><i
                                                         class='bx bxs-message-square-edit'></i></button></td>
@@ -159,7 +159,7 @@
                                     <select name="role_id" class="form-control" required>
                                         <option value="">Pilih Jenis</option>
                                         <option value="1">Super User</option>
-                                        <option value="2">Kasir</option>
+                                        <option value="3">Admin</option>
                                     </select>
                                 </div>
                             </div>
@@ -176,6 +176,24 @@
                                     <label for="">Confirmasi Password</label>
                                     <input type="password" name="password_confirmation" class="form-control" required>
                                 </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="">Akses Cabang</label>
+                                    <div class="row">
+                                        <div class="col-4"><label for="check_all_cabang"><input type="checkbox"
+                                                    id="check_all_cabang" value="" name=""> All</label></div>
+                                        @foreach ($cabang as $c)
+                                            <div class="col-4"><label for="cabang{{ $c->id }}"><input
+                                                        type="checkbox" id="cabang{{ $c->id }}" class="cabang"
+                                                        value="{{ $c->id }}" name="cabang_id[]">
+                                                    {{ $c->nama }}</label></div>
+                                        @endforeach
+
+                                    </div>
+                                </div>
+
                             </div>
 
 
@@ -200,7 +218,8 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="modal_add_userLabel">Edit User</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="row">
@@ -221,9 +240,53 @@
                                         <select name="role_id" class="form-control" required>
                                             <option value="1" {{ $u->role_id == 1 ? 'selected' : '' }}>Super User
                                             </option>
-                                            <option value="2" {{ $u->role_id == 2 ? 'selected' : '' }}>Kasir</option>
+                                            <option value="3" {{ $u->role_id == 3 ? 'selected' : '' }}>Admin</option>
                                         </select>
                                     </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="">Akses Cabang</label>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <label for=""><input type="checkbox" id="check_all_cabang"
+                                                    value="" name=""> All</label>
+                                        </div>
+                                        @if ($u->aksesCabang)
+                                            @foreach ($cabang as $k)
+                                                @php
+                                                    $nilai = 0;
+                                                @endphp
+                                                @foreach ($u->aksesCabang as $ak)
+                                                    @if ($ak->cabang_id == $k->id)
+                                                        @php
+                                                            $nilai++;
+                                                        @endphp
+                                                    @endif
+                                                @endforeach
+                                                @if ($nilai)
+                                                    <div class="col-4"><label for=""><input type="checkbox"
+                                                                class="cabang" value="{{ $k->id }}"
+                                                                name="cabang_id[]" checked> {{ $k->nama }}</label>
+                                                    </div>
+                                                @else
+                                                    <div class="col-4"><label for=""><input type="checkbox"
+                                                                class="cabang" value="{{ $k->id }}"
+                                                                name="cabang_id[]"> {{ $k->nama }}</label></div>
+                                                @endif
+                                            @endforeach
+                                        @else
+                                            @foreach ($cabang as $k)
+                                                <div class="col-12"><label for=""><input type="checkbox"
+                                                            class="cabang" value="{{ $k->id }}"
+                                                            name="cabang_id[]">
+                                                        {{ $k->nama }}</label></div>
+                                            @endforeach
+                                        @endif
+
+
+                                    </div>
+
                                 </div>
 
 
@@ -269,14 +332,14 @@
             });
             <?php endif; ?>
 
-            <?php if(session('error_kota')): ?>
+            <?php if(session('error')): ?>
             Swal.fire({
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 timer: 3000,
                 icon: 'error',
-                title: "{{ session('error_kota') }}"
+                title: "{{ session('error') }}"
             });
             <?php endif; ?>
 
@@ -290,6 +353,22 @@
             //     title: ' Ada data yang tidak sesuai, periksa kembali'
             // });
             // <?php endif; ?>
+
+            $(document).on('click', '#check_all_cabang', function() {
+                if (this.checked) {
+                    $('.cabang').prop('checked', true);
+                } else {
+                    $('.cabang').prop('checked', false);
+                }
+
+            });
+
+            $(document).on('click', '.cabang', function() {
+
+                $('#check_all_cabang').prop('checked', false);
+
+
+            });
 
 
 
