@@ -6,38 +6,8 @@
     <!-- Content -->
 
     <style>
-        /* .blick {
-                                                background-color: #ed1a3a;
-                                            }
-                                            .blink-soft {
-                                                animation: blinker 1.5s linear infinite;
-                                            }
-                                            @keyframes blinker {
-                                                50% {
-                                                    opacity: 0;
-                                                }
-                                            } */
 
-        .blink {
-            animation: blink 1.5s linear infinite;
-        }
 
-        @keyframes blink {
-            0% {
-                background-color: red;
-                color: white;
-            }
-
-            50% {
-                background-color: orange;
-                color: white;
-            }
-
-            100% {
-                background-color: rgb(223, 195, 9);
-                color: white;
-            }
-        }
     </style>
 
 
@@ -57,9 +27,9 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="float-start">Data User</h5>
+                        <h5 class="float-start">Data Cabang</h5>
                         <button type="button" class="btn btn-sm btn-primary float-end" data-bs-toggle="modal"
-                            data-bs-target="#modal_add_user"><i class='bx bxs-plus-circle'></i> Tambah Data</button>
+                            data-bs-target="#modal_add_data"><i class='bx bxs-plus-circle'></i> Tambah Data</button>
                     </div>
 
                     <div class="card-body">
@@ -69,9 +39,8 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Nama</th>
+                                        <th>Cabang</th>
                                         <th>Username</th>
-                                        <th>Jenis</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -79,15 +48,23 @@
                                     @php
                                         $i = 1;
                                     @endphp
-                                    @foreach ($user as $d)
+                                    @foreach ($cabang as $d)
                                         <tr>
                                             <td>{{ $i++ }}</td>
-                                            <td>{{ $d->name }}</td>
-                                            <td>{{ $d->username }}</td>
-                                            <td>{{ $d->role_id == 1 ? 'Super' : 'Kasir' }}</td>
-                                            <td><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#modal_edit_user{{ $d->id }}"><i
-                                                        class='bx bxs-message-square-edit'></i></button></td>
+                                            <td>{{ $d->nama }}</td>
+                                            <td>
+                                                @if ($d->user)
+                                                    @foreach ($d->user as $u)
+                                                        {{ $u->username }} <br>
+                                                    @endforeach
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#modal_edit_data{{ $d->id }}"><i
+                                                        class='bx bxs-message-square-edit'></i></button>
+
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -127,13 +104,13 @@
 
     <!-- Modal -->
 
-    <form method="POST" action="{{ route('addUser') }}">
+    <form id="form_add_data" method="POST" action="{{ route('addCabang') }}">
         @csrf
-        <div class="modal fade" id="modal_add_user" tabindex="-1" aria-labelledby="modal_add_userLabel" aria-hidden="true">
+        <div class="modal fade" id="modal_add_data" tabindex="-1" aria-labelledby="modal_add_dataLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered ">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modal_add_userLabel">Tambah User</h5>
+                        <h5 class="modal-title" id="modal_add_dataLabel">Tambah Cabang</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -141,8 +118,8 @@
 
                             <div class="col-12 mb-2">
                                 <div class="form-group">
-                                    <label for="">Nama</label>
-                                    <input type="text" name="name" class="form-control" required>
+                                    <label for="">Nama Cabang</label>
+                                    <input type="text" name="nama" class="form-control" required>
                                 </div>
                             </div>
 
@@ -150,17 +127,6 @@
                                 <div class="form-group">
                                     <label for="">Username</label>
                                     <input type="text" name="username" class="form-control" required>
-                                </div>
-                            </div>
-
-                            <div class="col-12 mb-2">
-                                <div class="form-group">
-                                    <label for="">Role/</label>
-                                    <select name="role_id" class="form-control" required>
-                                        <option value="">Pilih Jenis</option>
-                                        <option value="1">Super User</option>
-                                        <option value="2">Kasir</option>
-                                    </select>
                                 </div>
                             </div>
 
@@ -183,46 +149,35 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" id="btn_edit_user">Save</button>
+                        <button type="submit" class="btn btn-primary" id="btn_add_data">Save</button>
                     </div>
                 </div>
             </div>
         </div>
     </form>
 
-
-    @foreach ($user as $u)
-        <form method="POST" action="{{ route('editUser') }}">
+    @foreach ($cabang as $d)
+        <form method="POST" action="{{ route('editCabang') }}">
             @csrf
-            <div class="modal fade" id="modal_edit_user{{ $u->id }}" tabindex="-1"
-                aria-labelledby="modal_add_userLabel" aria-hidden="true">
+            @method('patch')
+            <div class="modal fade" id="modal_edit_data{{ $d->id }}" tabindex="-1"
+                aria-labelledby="modal_edit_dataLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered ">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="modal_add_userLabel">Edit User</h5>
+                            <h5 class="modal-title" id="modal_edit_dataLabel">Tambah Diskon</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="row">
 
-                                <input type="hidden" name="id" value="{{ $u->id }}">
-                                <div class="col-12 mb-2">
-                                    <div class="form-group">
-                                        <label for="">Nama</label>
-                                        <input type="text" name="name" class="form-control"
-                                            value="{{ $u->name }}" required>
-                                    </div>
-                                </div>
-
+                                <input type="hidden" name="id" value="{{ $d->id }}">
 
                                 <div class="col-12 mb-2">
                                     <div class="form-group">
-                                        <label for="">Role</label>
-                                        <select name="role_id" class="form-control" required>
-                                            <option value="1" {{ $u->role_id == 1 ? 'selected' : '' }}>Super User
-                                            </option>
-                                            <option value="2" {{ $u->role_id == 2 ? 'selected' : '' }}>Kasir</option>
-                                        </select>
+                                        <label for="">Nama Cabang</label>
+                                        <input type="text" name="nama" value="{{ $d->nama }}"
+                                            class="form-control" required>
                                     </div>
                                 </div>
 
@@ -231,17 +186,13 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" id="btn_edit_user">Save</button>
+                            <button type="submit" class="btn btn-primary">Edit</button>
                         </div>
                     </div>
                 </div>
             </div>
         </form>
     @endforeach
-
-
-
-
 
 @section('script')
     <script src="{{ asset('js') }}/qrcode.js" type="text/javascript"></script>
@@ -269,29 +220,34 @@
             });
             <?php endif; ?>
 
-            <?php if(session('error_kota')): ?>
+            <?php if(session('error')): ?>
             Swal.fire({
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 timer: 3000,
                 icon: 'error',
-                title: "{{ session('error_kota') }}"
+                title: "{{ session('error') }}"
             });
             <?php endif; ?>
 
-            // <?php if($errors->any()): ?>
-            // Swal.fire({
-            //     toast: true,
-            //     position: 'top-end',
-            //     showConfirmButton: false,
-            //     timer: 3000,
-            //     icon: 'error',
-            //     title: ' Ada data yang tidak sesuai, periksa kembali'
-            // });
-            // <?php endif; ?>
+            <?php if($errors->any()): ?>
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: ' Ada data yang tidak sesuai, periksa kembali'
+            });
+            <?php endif; ?>
 
 
+            $(document).on('submit', '#form_add_data', function(event) {
+                $('#btn_add_data').attr('disabled', true);
+                $('#btn_add_data').html('Loading...');
+
+            });
 
         });
     </script>

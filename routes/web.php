@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AmbilGajiController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CabangController;
 use App\Http\Controllers\DiskonController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\JurnalController;
@@ -116,8 +117,13 @@ Route::middleware('auth')->group(function () {
         Route::post('addInvestor', [InvestorController::class, 'addInvestor'])->name('addInvestor');
         Route::get('deletePersenInvestor/{id}', [InvestorController::class, 'deletePersenInvestor'])->name('deletePersenInvestor');
         Route::patch('editInvestor', [InvestorController::class, 'editInvestor'])->name('editInvestor');
-
         //endinvestor
+
+        //cabang
+        Route::get('cabang', [CabangController::class, 'index'])->name('cabang');
+        Route::post('addCabang', [CabangController::class, 'addCabang'])->name('addCabang');
+        Route::patch('editCabang', [CabangController::class, 'editCabang'])->name('editCabang');
+        //end cabnag
 
     });
 
