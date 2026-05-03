@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Akun;
 use App\Models\Cabang;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -12,7 +13,8 @@ class CabangController extends Controller
     {
         return view('cabang.index', [
             'title' => 'Cabang',
-            'cabang' => Cabang::with(['user'])->get(),
+            'cabang' => Cabang::with(['user', 'pengeluaranAkun'])->get(),
+            'akun' => Akun::all(),
         ]);
     }
 
