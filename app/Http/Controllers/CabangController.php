@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Akun;
 use App\Models\Cabang;
+use App\Models\PengeluaranAkun;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -73,5 +74,38 @@ class CabangController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Data cabang berhasil diubah');
+    }
+
+    public function addPengeluaranAkun(Request $request)
+    {
+
+        PengeluaranAkun::where('cabang_id', $request->id)->delete();
+
+        $akun_id = $request->akun_id;
+        $jenis = $request->jenis;
+        $jumlah = $request->jumlah;
+
+        $pengeluaran = [];
+
+        for ($count = 0; $count < count($akun_id); $count++) {
+            $pengeluaran[] = [
+                'cabang_id' => $request->id,
+                'akun_id' => $akun_id[$count],
+                'jenis' => $jenis[$count],
+                'jumlah' => $jumlah[$count],
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+        }
+
+        PengeluaranAkun::insert($pengeluaran);
+
+        return redirect()->back()->with('success', 'Data pengeluaran berhasil diubah');
+    }
+
+    public function deletePengeluaranAkun($id)
+    {
+        PengeluaranAkun::where('id', $id)->delete();
+        return redirect()->back()->with('success', 'Data pengeluaran berhasil diubah');
     }
 }

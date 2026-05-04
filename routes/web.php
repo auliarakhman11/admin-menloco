@@ -123,6 +123,8 @@ Route::middleware('auth')->group(function () {
         Route::get('cabang', [CabangController::class, 'index'])->name('cabang');
         Route::post('addCabang', [CabangController::class, 'addCabang'])->name('addCabang');
         Route::patch('editCabang', [CabangController::class, 'editCabang'])->name('editCabang');
+        Route::post('addPengeluaranAkun', [CabangController::class, 'addPengeluaranAkun'])->name('addPengeluaranAkun');
+        Route::get('deletePengeluaranAkun/{id}', [CabangController::class, 'deletePengeluaranAkun'])->name('deletePengeluaranAkun');
         //end cabnag
 
     });
