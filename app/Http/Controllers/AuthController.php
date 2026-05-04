@@ -36,7 +36,7 @@ class AuthController extends Controller
         //     return redirect(route('kasir'));
         // }
 
-        $user = User::where('username', $request->username)->where('role_id', 1)->first();
+        $user = User::where('username', $request->username)->whereIn('role_id', [1, 3])->first();
 
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
@@ -46,7 +46,7 @@ class AuthController extends Controller
                 // return redirect(route('dashboard'))->with('success','Selamat datang '. $user->name);
             } else {
                 throw ValidationException::withMessages([
-                    'password' => 'Password salah'
+                    'username' => 'Username atau password salah'
                 ]);
             }
         }
