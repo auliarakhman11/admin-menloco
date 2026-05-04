@@ -160,4 +160,13 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Akses Cabang harus diisi');
         }
     }
+
+    public function resetPassword($id)
+    {
+        User::where('id', $id)->update([
+            'password' => bcrypt('123456')
+        ]);
+
+        return redirect()->back()->with('success', 'Password berhasil direset, Password user menjadi 123456');
+    }
 }

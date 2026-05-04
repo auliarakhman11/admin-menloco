@@ -63,11 +63,15 @@ Route::middleware('auth')->group(function () {
         Route::get('laporanRefund', [LaporanController::class, 'laporanRefund'])->name('laporanRefund');
         Route::get('TerimaRefund/{id}', [LaporanController::class, 'TerimaRefund'])->name('TerimaRefund');
         Route::get('tolakRefund/{id}', [LaporanController::class, 'tolakRefund'])->name('tolakRefund');
-        //laporan
+        // endlaporan
+
+        //user
         Route::get('user', [UserController::class, 'index'])->name('user');
         Route::get('get-data-user', [UserController::class, 'getDataUser'])->name('getDataUser');
         Route::post('edit-user', [UserController::class, 'editUser'])->name('editUser');
         Route::post('add-user', [UserController::class, 'addUser'])->name('addUser');
+        Route::get('resetPassword/{id}', [UserController::class, 'resetPassword'])->name('resetPassword');
+        //end user
 
         //service
         Route::get('service', [ServiceController::class, 'index'])->name('service');

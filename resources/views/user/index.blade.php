@@ -7,16 +7,16 @@
 
     <style>
         /* .blick {
-                                                                                                                        background-color: #ed1a3a;
-                                                                                                                    }
-                                                                                                                    .blink-soft {
-                                                                                                                        animation: blinker 1.5s linear infinite;
-                                                                                                                    }
-                                                                                                                    @keyframes blinker {
-                                                                                                                        50% {
-                                                                                                                            opacity: 0;
+                                                                                                                            background-color: #ed1a3a;
                                                                                                                         }
-                                                                                                                    } */
+                                                                                                                        .blink-soft {
+                                                                                                                            animation: blinker 1.5s linear infinite;
+                                                                                                                        }
+                                                                                                                        @keyframes blinker {
+                                                                                                                            50% {
+                                                                                                                                opacity: 0;
+                                                                                                                            }
+                                                                                                                        } */
 
         .blink {
             animation: blink 1.5s linear infinite;
@@ -85,9 +85,14 @@
                                             <td>{{ $d->name }}</td>
                                             <td>{{ $d->username }}</td>
                                             <td>{{ $d->role_id == 1 ? 'Super User' : 'Admin' }}</td>
-                                            <td><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
                                                     data-bs-target="#modal_edit_user{{ $d->id }}"><i
-                                                        class='bx bxs-message-square-edit'></i></button></td>
+                                                        class='bx bxs-message-square-edit'></i></button>
+                                                <a href="{{ route('resetPassword', $d->id) }}"
+                                                    onclick="return confirm('Apakah anda yakin ingin mereset password?');"
+                                                    class="btn btn-sm btn-primary"><i class="bx bxs-key"></i></a>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
