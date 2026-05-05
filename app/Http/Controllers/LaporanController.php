@@ -79,20 +79,49 @@ class LaporanController extends Controller
 
     public function laporanRefund(Request $request)
     {
+        $data_user = AksesCabang::where('user_id', Auth::id())->get();
+        $dt_akses = [];
+        foreach ($data_user as $da) {
+
+            $dt_akses[] = $da->cabang_id;
+        }
+
         if ($request->query('tgl1')) {
             $tgl1 = $request->query('tgl1');
             $tgl2 = $request->query('tgl2');
+            $cabang_id = $request->query('cabang_id');
         } else {
             $tgl1 = date('Y-m-01');
             $tgl2 = date('Y-m-t');
+
+            if (empty($dt_akses)) {
+                $cabang_id = NULL;
+            } else {
+                $cabang_id = $dt_akses[0];
+            }
+        }
+
+        if ($cabang_id === NULL) {
+            $cabang = [];
+            $refund = [];
+        } else {
+            $cabang = Cabang::whereIn('id', $dt_akses)->get();
+
+            if ($cabang_id === 'all') {
+                $refund = Invoice::select('invoice.*')->where('void', 3)->where('tgl', '>=', $tgl1)->where('tgl', '<=', $tgl2)->with(['penjualan', 'penjualan.service', 'penjualanKaryawan', 'penjualanKaryawan.karyawan'])->get();
+            } else {
+                $refund = Invoice::select('invoice.*')->where('void', 3)->where('tgl', '>=', $tgl1)->where('tgl', '<=', $tgl2)->where('cabang_id', $cabang_id)->with(['penjualan', 'penjualan.service', 'penjualanKaryawan', 'penjualanKaryawan.karyawan'])->get();
+            }
         }
 
         return view('laporan.laporanRefund', [
             'title' => 'Laporan Penjualan',
             'tgl1' => $tgl1,
             'tgl2' => $tgl2,
+            'cabang' => $cabang,
+            'cabang_id' => $cabang_id,
             'permintaan' => Invoice::select('invoice.*')->where('void', 2)->with(['penjualan', 'penjualan.service', 'penjualanKaryawan', 'penjualanKaryawan.karyawan'])->get(),
-            'refund' => Invoice::select('invoice.*')->where('void', 3)->with(['penjualan', 'penjualan.service', 'penjualanKaryawan', 'penjualanKaryawan.karyawan'])->get()
+            'refund' => $refund,
         ]);
     }
 
