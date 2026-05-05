@@ -36,7 +36,7 @@
         </li>
 
 
-        @if (Auth::user()->role_id == 1)
+        @if (Auth::user()->role_id == 1 || Auth::user()->role_id == 3)
             <li class="menu-item {{ Request::is(['/', 'laporanRefund']) ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-store'></i>
@@ -93,53 +93,56 @@
 
                 </ul>
             </li>
-            <li
-                class="menu-item {{ Request::is(['user', 'service', 'karyawan', 'diskon', 'investor', 'cabang']) ? 'active open' : '' }}">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class='menu-icon tf-icons bx bxs-book-content'></i>
-                    <div data-i18n="Data Master">Data Master</div>
-                </a>
-                <ul class="menu-sub">
+            @if (Auth::user()->role_id == 1)
+                <li
+                    class="menu-item {{ Request::is(['user', 'service', 'karyawan', 'diskon', 'investor', 'cabang']) ? 'active open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class='menu-icon tf-icons bx bxs-book-content'></i>
+                        <div data-i18n="Data Master">Data Master</div>
+                    </a>
+                    <ul class="menu-sub">
 
 
-                    <li class="menu-item {{ Request::is('user') ? 'active' : '' }}">
-                        <a href="{{ route('user') }}" class="menu-link">
-                            <div data-i18n="User">User</div>
-                        </a>
-                    </li>
+                        <li class="menu-item {{ Request::is('user') ? 'active' : '' }}">
+                            <a href="{{ route('user') }}" class="menu-link">
+                                <div data-i18n="User">User</div>
+                            </a>
+                        </li>
 
-                    <li class="menu-item {{ Request::is('cabang') ? 'active' : '' }}">
-                        <a href="{{ route('cabang') }}" class="menu-link">
-                            <div data-i18n="Cabang">Cabang</div>
-                        </a>
-                    </li>
+                        <li class="menu-item {{ Request::is('cabang') ? 'active' : '' }}">
+                            <a href="{{ route('cabang') }}" class="menu-link">
+                                <div data-i18n="Cabang">Cabang</div>
+                            </a>
+                        </li>
 
-                    <li class="menu-item {{ Request::is('investor') ? 'active' : '' }}">
-                        <a href="{{ route('investor') }}" class="menu-link">
-                            <div data-i18n="Investor">Investor</div>
-                        </a>
-                    </li>
+                        <li class="menu-item {{ Request::is('investor') ? 'active' : '' }}">
+                            <a href="{{ route('investor') }}" class="menu-link">
+                                <div data-i18n="Investor">Investor</div>
+                            </a>
+                        </li>
 
-                    <li class="menu-item {{ Request::is('service') ? 'active' : '' }}">
-                        <a href="{{ route('service') }}" class="menu-link">
-                            <div data-i18n="Service">Service</div>
-                        </a>
-                    </li>
+                        <li class="menu-item {{ Request::is('service') ? 'active' : '' }}">
+                            <a href="{{ route('service') }}" class="menu-link">
+                                <div data-i18n="Service">Service</div>
+                            </a>
+                        </li>
 
-                    <li class="menu-item {{ Request::is('karyawan') ? 'active' : '' }}">
-                        <a href="{{ route('karyawan') }}" class="menu-link">
-                            <div data-i18n="Karyawan">Karyawan</div>
-                        </a>
-                    </li>
+                        <li class="menu-item {{ Request::is('karyawan') ? 'active' : '' }}">
+                            <a href="{{ route('karyawan') }}" class="menu-link">
+                                <div data-i18n="Karyawan">Karyawan</div>
+                            </a>
+                        </li>
 
-                    <li class="menu-item {{ Request::is('diskon') ? 'active' : '' }}">
-                        <a href="{{ route('diskon') }}" class="menu-link">
-                            <div data-i18n="diskon">Diskon</div>
-                        </a>
-                    </li>
+                        <li class="menu-item {{ Request::is('diskon') ? 'active' : '' }}">
+                            <a href="{{ route('diskon') }}" class="menu-link">
+                                <div data-i18n="diskon">Diskon</div>
+                            </a>
+                        </li>
 
-                </ul>
-            </li>
+                    </ul>
+                </li>
+            @endif
+
         @endif
 
 

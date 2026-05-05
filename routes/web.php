@@ -41,21 +41,20 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth')->group(function () {
 
     //kasir
-    Route::get('kasir', [KasirController::class, 'index'])->name('kasir');
-    Route::get('getInput', [KasirController::class, 'getInput'])->name('getInput');
-    Route::post('addPelanggan', [KasirController::class, 'addPelanggan'])->name('addPelanggan');
-    Route::get('getAntrian', [KasirController::class, 'getAntrian'])->name('getAntrian');
-    Route::get('getSelesai', [KasirController::class, 'getSelesai'])->name('getSelesai');
-    Route::get('deletePelanggan/{id}', [KasirController::class, 'deletePelanggan'])->name('deletePelanggan');
-    Route::get('getTambahPesanan', [KasirController::class, 'getTambahPesanan'])->name('getTambahPesanan');
-    Route::post('checkout', [KasirController::class, 'checkout'])->name('checkout');
-    Route::get('getDeatailPesanan/{invoice_id}', [KasirController::class, 'getDeatailPesanan'])->name('getDeatailPesanan');
-    Route::get('printNota', [KasirController::class, 'printNota'])->name('printNota');
-    Route::post('refundInvoice', [KasirController::class, 'refundInvoice'])->name('refundInvoice');
+    // Route::get('kasir', [KasirController::class, 'index'])->name('kasir');
+    // Route::get('getInput', [KasirController::class, 'getInput'])->name('getInput');
+    // Route::post('addPelanggan', [KasirController::class, 'addPelanggan'])->name('addPelanggan');
+    // Route::get('getAntrian', [KasirController::class, 'getAntrian'])->name('getAntrian');
+    // Route::get('getSelesai', [KasirController::class, 'getSelesai'])->name('getSelesai');
+    // Route::get('deletePelanggan/{id}', [KasirController::class, 'deletePelanggan'])->name('deletePelanggan');
+    // Route::get('getTambahPesanan', [KasirController::class, 'getTambahPesanan'])->name('getTambahPesanan');
+    // Route::post('checkout', [KasirController::class, 'checkout'])->name('checkout');
+    // Route::get('getDeatailPesanan/{invoice_id}', [KasirController::class, 'getDeatailPesanan'])->name('getDeatailPesanan');
+    // Route::get('printNota', [KasirController::class, 'printNota'])->name('printNota');
+    // Route::post('refundInvoice', [KasirController::class, 'refundInvoice'])->name('refundInvoice');
     //end kasir
 
-
-    Route::middleware('hakakses:1')->group(function () {
+    Route::middleware('hakakses:1,3')->group(function () {
         //laporan
         Route::get('/', [LaporanController::class, 'laporanPenjualan'])->name('laporanPenjualan');
         Route::get('detailLaporanPenjualan/{tgl}', [LaporanController::class, 'detailLaporanPenjualan'])->name('detailLaporanPenjualan');
@@ -64,34 +63,6 @@ Route::middleware('auth')->group(function () {
         Route::get('TerimaRefund/{id}', [LaporanController::class, 'TerimaRefund'])->name('TerimaRefund');
         Route::get('tolakRefund/{id}', [LaporanController::class, 'tolakRefund'])->name('tolakRefund');
         // endlaporan
-
-        //user
-        Route::get('user', [UserController::class, 'index'])->name('user');
-        Route::get('get-data-user', [UserController::class, 'getDataUser'])->name('getDataUser');
-        Route::post('edit-user', [UserController::class, 'editUser'])->name('editUser');
-        Route::post('add-user', [UserController::class, 'addUser'])->name('addUser');
-        Route::get('resetPassword/{id}', [UserController::class, 'resetPassword'])->name('resetPassword');
-        //end user
-
-        //service
-        Route::get('service', [ServiceController::class, 'index'])->name('service');
-        Route::post('addService', [ServiceController::class, 'addService'])->name('addService');
-        Route::patch('editService', [ServiceController::class, 'editService'])->name('editService');
-        Route::get('deleteService/{id}', [ServiceController::class, 'deleteService'])->name('deleteService');
-        //end service
-
-        //karyawan
-        Route::get('karyawan', [KaryawanController::class, 'index'])->name('karyawan');
-        Route::post('addKaryawan', [KaryawanController::class, 'addKaryawan'])->name('addKaryawan');
-        Route::patch('editKaryawan', [KaryawanController::class, 'editKaryawan'])->name('editKaryawan');
-        Route::get('deleteKaryawan/{id}', [KaryawanController::class, 'deleteKaryawan'])->name('deleteKaryawan');
-        //end karyawan
-
-        //diskon
-        Route::get('diskon', [DiskonController::class, 'index'])->name('diskon');
-        Route::post('addDiskon', [DiskonController::class, 'addDiskon'])->name('addDiskon');
-        Route::patch('editDiskon', [DiskonController::class, 'editDiskon'])->name('editDiskon');
-        //end diskon
 
         //jurnal
         Route::get('pengeluaran', [JurnalController::class, 'pengeluaran'])->name('pengeluaran');
@@ -115,6 +86,32 @@ Route::middleware('auth')->group(function () {
         Route::patch('editAmbilGaji', [AmbilGajiController::class, 'editAmbilGaji'])->name('editAmbilGaji');
         Route::get('deleteAmbilGaji/{id}', [AmbilGajiController::class, 'deleteAmbilGaji'])->name('deleteAmbilGaji');
         //endAmbilGaji
+    });
+
+
+    Route::middleware('hakakses:1')->group(function () {
+
+
+        //user
+        Route::get('user', [UserController::class, 'index'])->name('user');
+        Route::get('get-data-user', [UserController::class, 'getDataUser'])->name('getDataUser');
+        Route::post('edit-user', [UserController::class, 'editUser'])->name('editUser');
+        Route::post('add-user', [UserController::class, 'addUser'])->name('addUser');
+        Route::get('resetPassword/{id}', [UserController::class, 'resetPassword'])->name('resetPassword');
+        //end user
+
+        //service
+        Route::get('service', [ServiceController::class, 'index'])->name('service');
+        Route::post('addService', [ServiceController::class, 'addService'])->name('addService');
+        Route::patch('editService', [ServiceController::class, 'editService'])->name('editService');
+        Route::get('deleteService/{id}', [ServiceController::class, 'deleteService'])->name('deleteService');
+        //end service
+
+        //diskon
+        Route::get('diskon', [DiskonController::class, 'index'])->name('diskon');
+        Route::post('addDiskon', [DiskonController::class, 'addDiskon'])->name('addDiskon');
+        Route::patch('editDiskon', [DiskonController::class, 'editDiskon'])->name('editDiskon');
+        //end diskon
 
         //investor
         Route::get('investor', [InvestorController::class, 'index'])->name('investor');
@@ -130,6 +127,13 @@ Route::middleware('auth')->group(function () {
         Route::post('addPengeluaranAkun', [CabangController::class, 'addPengeluaranAkun'])->name('addPengeluaranAkun');
         Route::get('deletePengeluaranAkun/{id}', [CabangController::class, 'deletePengeluaranAkun'])->name('deletePengeluaranAkun');
         //end cabnag
+
+        //karyawan
+        Route::get('karyawan', [KaryawanController::class, 'index'])->name('karyawan');
+        Route::post('addKaryawan', [KaryawanController::class, 'addKaryawan'])->name('addKaryawan');
+        Route::patch('editKaryawan', [KaryawanController::class, 'editKaryawan'])->name('editKaryawan');
+        Route::get('deleteKaryawan/{id}', [KaryawanController::class, 'deleteKaryawan'])->name('deleteKaryawan');
+        //end karyawan
 
     });
 

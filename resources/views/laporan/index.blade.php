@@ -21,17 +21,35 @@
                     <div class="card-header">
                         <form action="" method="get">
                             <div class="row">
-                                <div class="col-12 col-md-4">
+                                <div class="col-12">
                                     <h5 class="float-start">Laporan Penjualan</h5>
                                 </div>
-                                <div class="col-4 col-md-3">
+                                <div class="col-6 col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Cabang</label>
+                                        <select class="form-control"
+                                            @if ($cabang_id !== null) name="cabang_id" @endif required>
+                                            <option value="">Pilih Cabang</option>
+                                            @foreach ($cabang as $c)
+                                                <option value="{{ $c->id }}"
+                                                    {{ $cabang_id == $c->id ? 'selected' : '' }}>{{ $c->nama }}
+                                                </option>
+                                            @endforeach
+                                            @if (Auth::user()->role_id == 1)
+                                                <option value="all" {{ $cabang_id == 'all' ? 'selected' : '' }}>Semua
+                                                    Cabang</option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
                                     <div class="form-group">
                                         <label for="">Dari</label>
                                         <input type="date" class="form-control" name="tgl1"
                                             value="{{ $tgl1 }}" required>
                                     </div>
                                 </div>
-                                <div class="col-4 col-md-3">
+                                <div class="col-6 col-md-3">
                                     <div class="form-group">
                                         <label for="">Sampai</label>
                                         <input type="date" class="form-control" name="tgl2"
@@ -39,7 +57,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-4 col-md-2">
+                                <div class="col-6 col-md-2">
                                     <button type="submit" class="btn btn-sm btn-primary mt-4"><i class='bx bx-search'></i>
                                     </button>
                                 </div>
@@ -51,157 +69,166 @@
 
                     <div class="card-body">
 
-                        <div class="table-responsive">
-                            <table class="table table-sm text-center" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Tanggal</th>
-                                        <th>Jumlah Customer</th>
-                                        <th>Total Penjualan</th>
-                                        <th>Detail</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @php
-                                        $i = 1;
-                                        $total = 0;
-                                    @endphp
-                                    @foreach ($laporan as $d)
-                                        @php
-                                            $total += $d->ttl_penjualan - $d->ttl_diskon;
-                                        @endphp
+                        @if (!empty($laporan))
+                            <div class="table-responsive">
+                                <table class="table table-sm text-center" width="100%">
+                                    <thead>
                                         <tr>
-                                            <td>{{ $i++ }}</td>
-                                            <td>{{ date('d/m/Y', strtotime($d->tgl)) }}</td>
-                                            <td>{{ $d->jml_pelanggan }}</td>
-                                            <td>{{ number_format($d->ttl_penjualan - $d->ttl_diskon, 0) }}</td>
-                                            <td>
-                                                <button type="button"
-                                                    class="btn btn-sm btn-primary detail_laporan_penjualan"
-                                                    data-bs-toggle="modal" data-bs-target="#modal_detail_laporan_penjualan"
-                                                    tgl="{{ $d->tgl }}"><i class='bx bx-search'></i>
-                                                </button>
-                                            </td>
+                                            <th>#</th>
+                                            <th>Tanggal</th>
+                                            <th>Jumlah Customer</th>
+                                            <th>Total Penjualan</th>
+                                            <th>Detail</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="3"><b>Total</b></td>
-                                        <td><b>{{ number_format($total, 0) }}</b></td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                        @php
+                                            $i = 1;
+                                            $total = 0;
+                                        @endphp
+                                        @foreach ($laporan as $d)
+                                            @php
+                                                $total += $d->ttl_penjualan - $d->ttl_diskon;
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $i++ }}</td>
+                                                <td>{{ date('d/m/Y', strtotime($d->tgl)) }}</td>
+                                                <td>{{ $d->jml_pelanggan }}</td>
+                                                <td>{{ number_format($d->ttl_penjualan - $d->ttl_diskon, 0) }}</td>
+                                                <td>
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-primary detail_laporan_penjualan"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modal_detail_laporan_penjualan"
+                                                        tgl="{{ $d->tgl }}"><i class='bx bx-search'></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3"><b>Total</b></td>
+                                            <td><b>{{ number_format($total, 0) }}</b></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        @endif
+
+
 
                     </div>
 
                 </div>
 
-                <div class="card mt-2">
-                    <div class="card-header">
+                @if (!empty($laporan))
+                    <div class="card mt-2">
+                        <div class="card-header">
 
-                        <div class="row">
-                            <div class="col-12">
-                                <h5 class="float-start">Laporan Per Service</h5>
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5 class="float-start">Laporan Per Service</h5>
+                                </div>
+
+                            </div>
+
+
+
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="table-responsive">
+                                <table class="table table-sm text-center" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Service</th>
+                                            <th>Jumlah Service</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @php
+                                            $i = 1;
+                                            $total = 0;
+                                        @endphp
+                                        @foreach ($perlayanan as $d)
+                                            @php
+                                                $total += $d->ttl_penjualan;
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $i++ }}</td>
+                                                <td>{{ $d->service->nm_service }}</td>
+                                                <td>{{ $d->jml_service }}</td>
+                                                <td>{{ number_format($d->ttl_penjualan, 0) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
 
                         </div>
 
-
-
                     </div>
 
-                    <div class="card-body">
+                    <div class="card mt-2">
+                        <div class="card-header">
 
-                        <div class="table-responsive">
-                            <table class="table table-sm text-center" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Service</th>
-                                        <th>Jumlah Service</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @php
-                                        $i = 1;
-                                        $total = 0;
-                                    @endphp
-                                    @foreach ($perlayanan as $d)
-                                        @php
-                                            $total += $d->ttl_penjualan;
-                                        @endphp
-                                        <tr>
-                                            <td>{{ $i++ }}</td>
-                                            <td>{{ $d->service->nm_service }}</td>
-                                            <td>{{ $d->jml_service }}</td>
-                                            <td>{{ number_format($d->ttl_penjualan, 0) }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5 class="float-start">Laporan Pembagian</h5>
+                                </div>
+
+                            </div>
+
+
                         </div>
 
-                    </div>
+                        <div class="card-body">
 
-                </div>
-
-                <div class="card mt-2">
-                    <div class="card-header">
-
-                        <div class="row">
-                            <div class="col-12">
-                                <h5 class="float-start">Laporan Pembagian</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm text-center" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Karyawan</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @php
+                                            $i = 1;
+                                            $total = 0;
+                                        @endphp
+                                        @foreach ($pembagian as $d)
+                                            @php
+                                                $total += $d->ttl_pembagian;
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $i++ }}</td>
+                                                <td>{{ $d->karyawan->nama }}</td>
+                                                <td>{{ number_format($d->ttl_pembagian, 0) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="2"><b>Total</b></td>
+                                            <td><b>{{ number_format($total, 0) }}</b></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
                             </div>
 
                         </div>
 
-
                     </div>
+                @endif
 
-                    <div class="card-body">
 
-                        <div class="table-responsive">
-                            <table class="table table-sm text-center" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Karyawan</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @php
-                                        $i = 1;
-                                        $total = 0;
-                                    @endphp
-                                    @foreach ($pembagian as $d)
-                                        @php
-                                            $total += $d->ttl_pembagian;
-                                        @endphp
-                                        <tr>
-                                            <td>{{ $i++ }}</td>
-                                            <td>{{ $d->karyawan->nama }}</td>
-                                            <td>{{ number_format($d->ttl_pembagian, 0) }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="2"><b>Total</b></td>
-                                        <td><b>{{ number_format($total, 0) }}</b></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-
-                    </div>
-
-                </div>
 
                 {{-- <div class="card mt-3">
           <div class="card-header">
