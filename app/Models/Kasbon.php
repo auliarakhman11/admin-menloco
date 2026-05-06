@@ -9,7 +9,7 @@ class Kasbon extends Model
 {
     use HasFactory;
     protected $table = 'kasbon';
-    protected $fillable = ['karyawan_id', 'jumlah', 'tgl', 'user_id', 'void'];
+    protected $fillable = ['cabang_id', 'karyawan_id', 'jumlah', 'tgl', 'user_id', 'void'];
 
     public function karyawan()
     {

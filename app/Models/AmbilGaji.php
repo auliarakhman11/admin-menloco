@@ -10,7 +10,7 @@ class AmbilGaji extends Model
     use HasFactory;
 
     protected $table = 'ambil_gaji';
-    protected $fillable = ['karyawan_id', 'jumlah', 'tgl', 'user_id', 'void'];
+    protected $fillable = ['cabang_id', 'karyawan_id', 'jumlah', 'tgl', 'user_id', 'void'];
 
     public function karyawan()
     {
