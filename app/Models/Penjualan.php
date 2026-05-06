@@ -15,4 +15,9 @@ class Penjualan extends Model
     {
         return $this->belongsTo(Service::class, 'service_id', 'id');
     }
+
+    public function cabang()
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id', 'id');
+    }
 }

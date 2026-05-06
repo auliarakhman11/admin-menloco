@@ -120,7 +120,7 @@ class LaporanController extends Controller
             'tgl2' => $tgl2,
             'cabang' => $cabang,
             'cabang_id' => $cabang_id,
-            'permintaan' => Invoice::select('invoice.*')->where('void', 2)->with(['penjualan', 'penjualan.service', 'penjualanKaryawan', 'penjualanKaryawan.karyawan'])->get(),
+            'permintaan' => Invoice::select('invoice.*')->whereIn('cabang_id', $dt_akses)->where('void', 2)->with(['penjualan', 'penjualan.service', 'penjualanKaryawan', 'penjualanKaryawan.karyawan', 'cabang'])->get(),
             'refund' => $refund,
         ]);
     }

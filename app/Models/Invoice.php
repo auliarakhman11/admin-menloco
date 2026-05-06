@@ -16,6 +16,11 @@ class Invoice extends Model
         return $this->hasMany(Penjualan::class, 'invoice_id', 'id');
     }
 
+    public function cabang()
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id', 'id');
+    }
+
     public function penjualanKaryawan()
     {
         return $this->hasMany(PenjualanKaryawan::class, 'invoice_id', 'id');

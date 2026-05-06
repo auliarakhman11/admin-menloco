@@ -56,6 +56,7 @@
                                 <thead>
                                     <tr class="text-center">
                                         <th>#</th>
+                                        <th>Cabang</th>
                                         <th>Antrian</th>
                                         <th>Waktu Selesai</th>
                                         <th>Invoice</th>
@@ -75,6 +76,7 @@
                                         @endphp
                                         <tr class="text-center">
                                             <td>{{ $i++ }}</td>
+                                            <td>{{ $d->cabang->nama }}</td>
                                             <td>{{ $d->no_antrian }}</td>
                                             <td>{{ date('d/m/Y H:i', strtotime($d->updated_at)) }}</td>
                                             <td>{{ $d->no_invoice }}</td>
@@ -159,6 +161,7 @@
                                 <thead>
                                     <tr class="text-center">
                                         <th>#</th>
+                                        <th>Cabang</th>
                                         <th>Antrian</th>
                                         <th>Waktu Selesai</th>
                                         <th>Invoice</th>
@@ -178,6 +181,7 @@
                                         @endphp
                                         <tr class="text-center">
                                             <td>{{ $i++ }}</td>
+                                            <td>{{ $d->cabang->nama }}</td>
                                             <td>{{ $d->no_antrian }}</td>
                                             <td>{{ date('d/m/Y H:i', strtotime($d->updated_at)) }}</td>
                                             <td>{{ $d->no_invoice }}</td>

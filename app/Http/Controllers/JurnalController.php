@@ -238,19 +238,48 @@ class JurnalController extends Controller
     public function pengeluaran(Request $request)
     {
 
+        $data_user = AksesCabang::where('user_id', Auth::id())->get();
+        $dt_akses = [];
+        foreach ($data_user as $da) {
+
+            $dt_akses[] = $da->cabang_id;
+        }
+
         if ($request->query('tgl1')) {
             $tgl1 = $request->query('tgl1');
             $tgl2 = $request->query('tgl2');
+            $cabang_id = $request->query('cabang_id');
         } else {
             $tgl1 = date('Y-m-01');
             $tgl2 = date('Y-m-t');
+
+            if (empty($dt_akses)) {
+                $cabang_id = NULL;
+            } else {
+                $cabang_id = $dt_akses[0];
+            }
+        }
+
+        if ($cabang_id === NULL) {
+            $cabang = [];
+            $jurnal = [];
+        } else {
+            $cabang = Cabang::whereIn('id', $dt_akses)->get();
+
+            if ($cabang_id === 'all') {
+                $jurnal = Jurnal::where('tgl', '>=', $tgl1)->where('tgl', '<=', $tgl2)->where('jenis', 2)->where('void', 0)->with(['akun', 'user', 'cabang'])->get();
+            } else {
+                $jurnal = Jurnal::where('tgl', '>=', $tgl1)->where('tgl', '<=', $tgl2)->where('jenis', 2)->where('void', 0)->where('cabang_id', $cabang_id)->with(['akun', 'user', 'cabang'])->get();
+            }
         }
 
         return view('jurnal.pengeluaran', [
             'title' => 'Laporan Pengeluaran',
             'tgl1' => $tgl1,
             'tgl2' => $tgl2,
-            'jurnal' => Jurnal::where('tgl', '>=', $tgl1)->where('tgl', '<=', $tgl2)->where('jenis', 2)->where('void', 0)->with(['akun', 'user'])->get(),
+            'cabang' => $cabang,
+            'cabang_id' => $cabang_id,
+            'jurnal' => $jurnal,
             'akun' => Akun::all(),
         ]);
     }
@@ -258,7 +287,7 @@ class JurnalController extends Controller
     public function addPengeluaran(Request $request)
     {
         Jurnal::create([
-            'cabang_id' => 1,
+            'cabang_id' => $request->cabang_id,
             'akun_id' => $request->akun_id,
             'jumlah' => $request->jumlah,
             'ket' => $request->ket,
@@ -274,6 +303,7 @@ class JurnalController extends Controller
     public function editPengeluaran(Request $request)
     {
         Jurnal::where('id', $request->id)->update([
+            'cabang_id' => $request->cabang_id,
             'akun_id' => $request->akun_id,
             'jumlah' => $request->jumlah,
             'ket' => $request->ket,

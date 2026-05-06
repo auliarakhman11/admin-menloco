@@ -21,17 +21,35 @@
                     <div class="card-header">
                         <form action="" method="get">
                             <div class="row">
-                                <div class="col-12 col-md-4">
+                                <div class="col-12">
                                     <h5 class="float-start">Laporan Pengeluaran</h5>
                                 </div>
-                                <div class="col-4 col-md-3">
+                                <div class="col-6 col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Cabang</label>
+                                        <select class="form-control"
+                                            @if ($cabang_id !== null) name="cabang_id" @endif required>
+                                            <option value="">Pilih Cabang</option>
+                                            @foreach ($cabang as $c)
+                                                <option value="{{ $c->id }}"
+                                                    {{ $cabang_id == $c->id ? 'selected' : '' }}>{{ $c->nama }}
+                                                </option>
+                                            @endforeach
+                                            @if (Auth::user()->role_id == 1)
+                                                <option value="all" {{ $cabang_id == 'all' ? 'selected' : '' }}>Semua
+                                                    Cabang</option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
                                     <div class="form-group">
                                         <label for="">Dari</label>
                                         <input type="date" class="form-control" name="tgl1"
                                             value="{{ $tgl1 }}" required>
                                     </div>
                                 </div>
-                                <div class="col-4 col-md-3">
+                                <div class="col-6 col-md-3">
                                     <div class="form-group">
                                         <label for="">Sampai</label>
                                         <input type="date" class="form-control" name="tgl2"
@@ -39,7 +57,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-4 col-md-2">
+                                <div class="col-6 col-md-2">
                                     <button type="submit" class="btn btn-sm btn-primary mt-4 float-end"><i
                                             class='bx bx-search'></i>
                                     </button>
@@ -58,11 +76,12 @@
                     <div class="card-body">
 
                         <div class="table-responsive">
-                            <table class="table table-sm text-center" width="100%">
+                            <table class="table table-sm text-center" id="table" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Tanggal</th>
+                                        <th>Cabang</th>
                                         <th>Akun</th>
                                         <th>Jumlah</th>
                                         <th>Keterangan</th>
@@ -82,6 +101,7 @@
                                         <tr>
                                             <td>{{ $i++ }}</td>
                                             <td>{{ date('d/m/Y', strtotime($d->tgl)) }}</td>
+                                            <td>{{ $d->cabang->nama }}</td>
                                             <td>{{ $d->akun->nm_akun }}</td>
                                             <td>{{ number_format($d->jumlah, 0) }}</td>
                                             <td>{{ $d->ket }}</td>
@@ -100,7 +120,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="3"><b>Total</b></td>
+                                        <td colspan="4"><b>Total</b></td>
                                         <td><b>{{ number_format($total, 0) }}</b></td>
                                         <td colspan="3"></td>
                                     </tr>
@@ -166,6 +186,18 @@
 
                             <div class="col-12 mb-2">
                                 <div class="form-group">
+                                    <label for="">Cabang</label>
+                                    <select name="cabang_id" class="form-control" required>
+                                        <option value="">Pilih Cabang</option>
+                                        @foreach ($cabang as $c)
+                                            <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
                                     <label for="">Akun</label>
                                     <select name="akun_id" class="form-control" required>
                                         <option value="">Pilih Akun</option>
@@ -175,7 +207,6 @@
                                     </select>
                                 </div>
                             </div>
-
 
                             <div class="col-12 mb-2">
                                 <div class="form-group">
@@ -226,6 +257,19 @@
                                         <label for="">Tanggal</label>
                                         <input type="date" name="tgl" value="{{ $d->tgl }}"
                                             class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Cabang</label>
+                                        <select name="cabang_id" class="form-control" required>
+                                            @foreach ($cabang as $c)
+                                                <option value="{{ $c->id }}"
+                                                    {{ $c->id == $d->cabang_id ? 'selected' : '' }}>{{ $c->nama }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
 

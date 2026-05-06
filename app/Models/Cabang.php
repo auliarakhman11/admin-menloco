@@ -9,7 +9,7 @@ class Cabang extends Model
 {
     use HasFactory;
     protected $table = 'cabang';
-    protected $fillable = ['nama', 'possition', 'time_zome', 'off'];
+    protected $fillable = ['nama', 'possition', 'time_zone', 'off'];
 
     public function user()
     {

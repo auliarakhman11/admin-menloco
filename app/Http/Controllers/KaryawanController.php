@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cabang;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,8 @@ class KaryawanController extends Controller
     {
         return view('karyawan.index', [
             'title' => 'Karyawan',
-            'karyawan' => Karyawan::where('void', 0)->get(),
+            'karyawan' => Karyawan::where('void', 0)->with('cabang')->get(),
+            'cabang' => Cabang::all(),
         ]);
     }
 
@@ -20,6 +22,7 @@ class KaryawanController extends Controller
     {
         Karyawan::create([
             'nama' => $request->nama,
+            'cabang_id' => $request->cabang_id,
             'no_tlp' => $request->no_tlp,
             'alamat' => $request->alamat,
             'tgl_masuk' => $request->tgl_masuk,
@@ -35,6 +38,7 @@ class KaryawanController extends Controller
     {
         Karyawan::where('id', $request->id)->update([
             'nama' => $request->nama,
+            'cabang_id' => $request->cabang_id,
             'no_tlp' => $request->no_tlp,
             'alamat' => $request->alamat,
             'tgl_masuk' => $request->tgl_masuk,

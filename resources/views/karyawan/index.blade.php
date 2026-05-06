@@ -32,6 +32,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Karyawan</th>
+                                        <th>Cabang</th>
                                         <th>No Telepon</th>
                                         <th>Alamat</th>
                                         <th>Tanggal Masuk</th>
@@ -46,6 +47,7 @@
                                         <tr>
                                             <td>{{ $i++ }}</td>
                                             <td>{{ $d->nama }}</td>
+                                            <td>{{ $d->cabang->nama }}</td>
                                             <td>{{ $d->no_tlp }}</td>
                                             <td>{{ $d->alamat }}</td>
                                             <td>{{ $d->tgl_masuk ? date('d/m/Y', strtotime($d->tgl_masuk)) : '' }}</td>
@@ -118,6 +120,18 @@
 
                             <div class="col-12 mb-2">
                                 <div class="form-group">
+                                    <label for="">Cabang</label>
+                                    <select class="form-control" name="cabang_id" required>
+                                        <option value="">Pilih Cabang</option>
+                                        @foreach ($cabang as $c)
+                                            <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
                                     <label for="">Nomor Telepon</label>
                                     <input type="number" name="no_tlp" class="form-control">
                                 </div>
@@ -178,6 +192,19 @@
                                         <label for="">Nama Karyawan</label>
                                         <input type="text" name="nama" class="form-control"
                                             value="{{ $d->nama }}" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Cabang</label>
+                                        <select class="form-control" name="cabang_id" required>
+                                            @foreach ($cabang as $c)
+                                                <option value="{{ $c->id }}"
+                                                    {{ $d->cabang_id == $c->id ? 'selected' : '' }}>{{ $c->nama }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
 
