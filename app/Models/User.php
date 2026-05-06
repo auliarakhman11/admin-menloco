@@ -47,6 +47,6 @@ class User extends Authenticatable
 
     public function AksesCabang()
     {
-        return $this->hasMany(aksesCabang::class, 'user_id', 'id');
+        return $this->hasMany(AksesCabang::class, 'user_id', 'id');
     }
 }

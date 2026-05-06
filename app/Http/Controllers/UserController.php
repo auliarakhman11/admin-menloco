@@ -23,7 +23,7 @@ class UserController extends Controller
     {
         return view('user.index', [
             'title' => 'User',
-            'user' => User::whereIn('role_id', [1, 3])->with('aksesCabang')->get(),
+            'user' => User::whereIn('role_id', [1, 3])->with('AksesCabang')->get(),
             'cabang' => Cabang::all(),
         ]);
     }
