@@ -146,11 +146,12 @@ class JurnalController extends Controller
 
             $dt_chart = [];
             $dt_chart['label'] = $cb->nama;
-            $rc1 = str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
-            $rc2 = str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
-            $rc3 = str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
+            // $rc1 = str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
+            // $rc2 = str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
+            // $rc3 = str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
 
-            $color = $rc1 . $rc2 . $rc3;
+            // $color = $rc1 . $rc2 . $rc3;
+            $color = '050505';
             $dt_chart['data'] =  $data_penjuaalan;
             $dt_chart['backgroundColor'] = '#' . $color;
             $dt_chart['borderColor'] = '#' . $color;

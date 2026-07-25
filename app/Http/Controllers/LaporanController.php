@@ -140,4 +140,39 @@ class LaporanController extends Controller
         PenjualanKaryawan::where('invoice_id', $id)->update(['void' => 0]);
         return redirect()->back()->with('success', 'Refund ditolak');
     }
+
+    public function laporanKeuangan(Request $request)
+    {
+        $data_user = AksesCabang::where('user_id', Auth::id())->get();
+        $dt_akses = [];
+        foreach ($data_user as $da) {
+
+            $dt_akses[] = $da->cabang_id;
+        }
+
+        if ($request->query('tgl1')) {
+            $tgl1 = $request->query('tgl1');
+            $tgl2 = $request->query('tgl2');
+            $cabang_id = $request->query('cabang_id');
+        } else {
+            $tgl1 = date('Y-m-01');
+            $tgl2 = date('Y-m-t');
+
+            if (empty($dt_akses)) {
+                $cabang_id = NULL;
+            } else {
+                $cabang_id = $dt_akses[0];
+            }
+        }
+
+        if ($cabang_id === NULL) {
+            $cabang = [];
+            $penjualanService = Penjualan::selectRaw("SUM(penjualan.qty * penjualan.harga) as ttl_penjualan")->leftJoin('service', 'penjualan.service_id', '=', 'service.id')->where('penjualan.tgl', '>=', $tgl1)->where('penjualan.tgl', '<=', $tgl2)->where('penjualan.void', 0)->where('service.jenis', 1)->first();
+            $penjualanProduk = Penjualan::selectRaw("SUM(penjualan.qty * penjualan.harga) as ttl_penjualan")->leftJoin('service', 'penjualan.service_id', '=', 'service.id')->where('penjualan.tgl', '>=', $tgl1)->where('penjualan.tgl', '<=', $tgl2)->where('penjualan.void', 0)->where('service.jenis', 2)->first();
+        } else {
+            $cabang = Cabang::whereIn('id', $dt_akses)->get();
+            $penjualanService = Penjualan::selectRaw("SUM(penjualan.qty * penjualan.harga) as ttl_penjualan")->leftJoin('service', 'penjualan.service_id', '=', 'service.id')->where('penjualan.tgl', '>=', $tgl1)->where('penjualan.tgl', '<=', $tgl2)->where('cabang_id', $cabang_id)->where('penjualan.void', 0)->where('service.jenis', 1)->first();
+            $penjualanProduk = Penjualan::selectRaw("SUM(penjualan.qty * penjualan.harga) as ttl_penjualan")->leftJoin('service', 'penjualan.service_id', '=', 'service.id')->where('penjualan.tgl', '>=', $tgl1)->where('penjualan.tgl', '<=', $tgl2)->where('cabang_id', $cabang_id)->where('penjualan.void', 0)->where('service.jenis', 2)->first();
+        }
+    }
 }
