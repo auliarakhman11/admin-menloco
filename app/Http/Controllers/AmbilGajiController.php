@@ -6,6 +6,9 @@ use App\Models\AksesCabang;
 use App\Models\AmbilGaji;
 use App\Models\Cabang;
 use App\Models\Karyawan;
+use App\Models\Kasbon;
+use App\Models\PenjualanKaryawan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -96,5 +99,54 @@ class AmbilGajiController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Data berhasil dihapus');
+    }
+
+    /**
+     * Hitung ringkasan finansial karyawan per bulan/tahun untuk batas maksimal pengambilan gaji.
+     */
+    public function getDataAmbilGaji(Request $request)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'karyawan_id' => 'required|integer',
+        ]);
+
+        $date = Carbon::parse($request->tanggal);
+        $month = $date->month;
+        $year = $date->year;
+        $karyawanId = $request->karyawan_id;
+
+        $totalPendapatan = PenjualanKaryawan::where('karyawan_id', $karyawanId)
+            ->where('void', 0)
+            ->whereYear('tgl', $year)
+            ->whereMonth('tgl', $month)
+            ->sum('harga');
+
+        $totalKasbon = Kasbon::where('karyawan_id', $karyawanId)
+            ->where('void', 0)
+            ->whereYear('tgl', $year)
+            ->whereMonth('tgl', $month)
+            ->sum('jumlah');
+
+        $totalSudahDiambil = AmbilGaji::where('karyawan_id', $karyawanId)
+            ->where('void', 0)
+            ->whereYear('tgl', $year)
+            ->whereMonth('tgl', $month)
+            ->sum('jumlah');
+
+        $sisaMaksimal = $totalPendapatan - $totalKasbon - $totalSudahDiambil;
+        if ($sisaMaksimal < 0) {
+            $sisaMaksimal = 0;
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'total_pendapatan' => (float) $totalPendapatan,
+                'total_kasbon' => (float) $totalKasbon,
+                'total_sudah_diambil' => (float) $totalSudahDiambil,
+                'sisa_maksimal' => (float) $sisaMaksimal,
+            ],
+        ]);
     }
 }

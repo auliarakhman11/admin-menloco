@@ -66,7 +66,8 @@
                         </form>
                         <div class="row">
                             <div class="col-12"><button type="button" class="btn btn-sm btn-primary float-end"
-                                    data-bs-toggle="modal" data-bs-target="#modal_add"><i class='bx bxs-plus-circle'></i>
+                                    id="btn_tambah_data" data-bs-toggle="modal" data-bs-target="#modal_add"><i
+                                        class='bx bxs-plus-circle'></i>
                                     Tambah Data</button></div>
                         </div>
 
@@ -177,14 +178,14 @@
                             <div class="col-12 mb-2">
                                 <div class="form-group">
                                     <label for="">Tanggal</label>
-                                    <input type="date" name="tgl" class="form-control" required>
+                                    <input type="date" name="tgl" id="tanggal" class="form-control" required>
                                 </div>
                             </div>
 
                             <div class="col-12 mb-2">
                                 <div class="form-group">
                                     <label for="">Karyawan</label>
-                                    <select name="karyawan_id" class="form-control" required>
+                                    <select name="karyawan_id" id="karyawan_id" class="form-control" required>
                                         <option value="">Pilih Karyawan</option>
                                         @foreach ($karyawan as $d)
                                             <option value="{{ $d->id }}">{{ $d->nama }}
@@ -195,11 +196,32 @@
                                 </div>
                             </div>
 
+                            <div class="col-12 mb-2 d-none" id="info_gaji_container">
+                                <div class="alert alert-info mb-0 py-2">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Total Pendapatan:</span>
+                                        <strong id="info_pendapatan">Rp 0</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Total Kasbon:</span>
+                                        <strong id="info_kasbon">Rp 0</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Sudah Diambil:</span>
+                                        <strong id="info_sudah_diambil">Rp 0</strong>
+                                    </div>
+                                    <hr class="my-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Sisa Maksimal:</span>
+                                        <strong class="text-primary" id="info_sisa_maksimal">Rp 0</strong>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div class="col-12 mb-2">
                                 <div class="form-group">
                                     <label for="">Jumlah</label>
-                                    <input type="number" name="jumlah" class="form-control" required>
+                                    <input type="number" name="jumlah" id="jumlah" class="form-control" min="0" required>
                                 </div>
                             </div>
 
@@ -283,6 +305,13 @@
     <script src="{{ asset('js') }}/qrcode.js" type="text/javascript"></script>
 
     <script>
+        // Format angka ke Rupiah
+        function formatRupiah(angka) {
+            return 'Rp ' + parseInt(angka || 0).toLocaleString('id-ID');
+        }
+
+        var sisaMaksimalGaji = 0;
+
         $(document).ready(function() {
             $.ajaxSetup({
                 headers: {
@@ -327,12 +356,124 @@
             });
             <?php endif; ?>
 
+            // Reset form tambah data untuk transaksi baru
+            function resetFormAdd() {
+                $('#form_add')[0].reset();
+                $('#info_gaji_container').addClass('d-none');
+                $('#jumlah').prop('disabled', false).removeAttr('max').removeData('sisa-maksimal');
+                sisaMaksimalGaji = 0;
+            }
+
+            // Ambil dan tampilkan detail kalkulasi gaji berdasarkan tanggal & karyawan
+            function loadDetailGaji() {
+                var tanggal = $('#tanggal').val();
+                var karyawanId = $('#karyawan_id').val();
+
+                if (!tanggal || !karyawanId) {
+                    $('#info_gaji_container').addClass('d-none');
+                    $('#jumlah').prop('disabled', false).removeAttr('max').removeData('sisa-maksimal');
+                    sisaMaksimalGaji = 0;
+                    return;
+                }
+
+                $('#jumlah').prop('disabled', true);
+
+                $.ajax({
+                    url: "{{ route('ambil-gaji.get-data-karyawan') }}",
+                    type: 'GET',
+                    data: {
+                        tanggal: tanggal,
+                        karyawan_id: karyawanId
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            var data = response.data;
+                            sisaMaksimalGaji = parseFloat(data.sisa_maksimal) || 0;
+
+                            $('#info_pendapatan').text(formatRupiah(data.total_pendapatan));
+                            $('#info_kasbon').text(formatRupiah(data.total_kasbon));
+                            $('#info_sudah_diambil').text(formatRupiah(data.total_sudah_diambil));
+                            $('#info_sisa_maksimal').text(formatRupiah(data.sisa_maksimal));
+
+                            $('#info_gaji_container').removeClass('d-none');
+                            $('#jumlah').prop('disabled', false).attr('max', sisaMaksimalGaji).data('sisa-maksimal', sisaMaksimalGaji);
+                        }
+                    },
+                    error: function(xhr) {
+                        $('#info_gaji_container').addClass('d-none');
+                        $('#jumlah').prop('disabled', false).removeAttr('max').removeData('sisa-maksimal');
+                        sisaMaksimalGaji = 0;
+
+                        var message = 'Gagal mengambil data kalkulasi gaji.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            message = Object.values(xhr.responseJSON.errors).flat().join(', ');
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            position: 'top-end',
+                            title: 'Error',
+                            text: message
+                        });
+                    }
+                });
+            }
+
+            // Reset form saat tombol Tambah Data diklik (transaksi baru)
+            $('#btn_tambah_data').on('click', function() {
+                resetFormAdd();
+            });
+
+            // Muat ulang detail gaji saat modal dibuka kembali dengan nilai yang sudah terisi
+            $('#modal_add').on('shown.bs.modal', function() {
+                loadDetailGaji();
+            });
+
+            // Kembalikan state tombol submit saat modal ditutup
+            $('#modal_add').on('hidden.bs.modal', function() {
+                $('#btn_add').attr('disabled', false).html('Save');
+            });
+
+            // Ambil data kalkulasi gaji saat tanggal atau karyawan berubah
+            $('#modal_add').on('change', '#tanggal, #karyawan_id', function() {
+                loadDetailGaji();
+            });
+
+            // Validasi nominal tidak melebihi sisa maksimal
+            function validasiJumlahGaji(showAlert) {
+                var jumlah = parseFloat($('#jumlah').val()) || 0;
+                var batas = sisaMaksimalGaji;
+
+                if (batas > 0 && jumlah > batas) {
+                    if (showAlert) {
+                        Swal.fire({
+                            icon: 'warning',
+                            position: 'top-end',
+                            title: 'Peringatan',
+                            text: 'Nominal melebihi sisa batas maksimal gaji yang bisa diambil (' + formatRupiah(batas) + ')'
+                        });
+                    }
+                    $('#jumlah').val(batas);
+                    return false;
+                }
+
+                return true;
+            }
+
+            $('#jumlah').on('input keyup change', function() {
+                validasiJumlahGaji(true);
+            });
+
             $(document).on('submit', '#form_add', function(event) {
+                if (!validasiJumlahGaji(true)) {
+                    event.preventDefault();
+                    return false;
+                }
 
                 $('#btn_add').attr('disabled', true);
                 $('#btn_add').html('Loading..');
-
-
             });
 
 
