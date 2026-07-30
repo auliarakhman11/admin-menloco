@@ -82,6 +82,7 @@ Route::middleware('auth')->group(function () {
 
         //AmbilGaji
         Route::get('ambilGaji', [AmbilGajiController::class, 'index'])->name('ambilGaji');
+        Route::get('ambil-gaji/get-data-karyawan', [AmbilGajiController::class, 'getDataAmbilGaji'])->name('ambil-gaji.get-data-karyawan');
         Route::post('addAmbilGaji', [AmbilGajiController::class, 'addAmbilGaji'])->name('addAmbilGaji');
         Route::patch('editAmbilGaji', [AmbilGajiController::class, 'editAmbilGaji'])->name('editAmbilGaji');
         Route::get('deleteAmbilGaji/{id}', [AmbilGajiController::class, 'deleteAmbilGaji'])->name('deleteAmbilGaji');
