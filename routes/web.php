@@ -12,6 +12,7 @@ use App\Http\Controllers\KasirController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LaporanKeuanganController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -63,6 +64,15 @@ Route::middleware('auth')->group(function () {
         Route::get('TerimaRefund/{id}', [LaporanController::class, 'TerimaRefund'])->name('TerimaRefund');
         Route::get('tolakRefund/{id}', [LaporanController::class, 'tolakRefund'])->name('tolakRefund');
         // endlaporan
+
+        // laporan keuangan
+        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan.index');
+        Route::post('/laporan-keuangan/pendapatan-dll', [LaporanKeuanganController::class, 'storePendapatanDll'])->name('laporan-keuangan.store-pendapatan-dll');
+        Route::delete('/laporan-keuangan/pendapatan-dll/{id}', [LaporanKeuanganController::class, 'destroyPendapatanDll'])->name('laporan-keuangan.destroy-pendapatan-dll');
+        Route::post('/laporan-keuangan/dana', [LaporanKeuanganController::class, 'storeDana'])->name('laporan-keuangan.store-dana');
+        Route::delete('/laporan-keuangan/dana/{id}', [LaporanKeuanganController::class, 'destroyDana'])->name('laporan-keuangan.destroy-dana');
+        Route::post('/laporan-keuangan/produk', [LaporanKeuanganController::class, 'storeProduk'])->name('laporan-keuangan.store-produk');
+        Route::delete('/laporan-keuangan/produk/{id}', [LaporanKeuanganController::class, 'destroyProduk'])->name('laporan-keuangan.destroy-produk');
 
         //jurnal
         Route::get('pengeluaran', [JurnalController::class, 'pengeluaran'])->name('pengeluaran');

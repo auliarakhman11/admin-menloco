@@ -22,7 +22,7 @@
                         <form action="" method="get">
                             <div class="row">
                                 <div class="col-12">
-                                    <h5 class="float-start">Laporan Piutang</h5>
+                                    <h5 class="float-start">Laporan Kasbon</h5>
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <div class="form-group">

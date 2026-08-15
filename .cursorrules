@@ -1,0 +1,26 @@
+# BARBERSHOP ADMIN - CURSOR RULES
+
+## TECH STACK CONSTRAINTS
+- Framework: Laravel 9.52.21 (PHP 8.x)
+- Database: MySQL (XAMPP / local Apache)
+- UI Framework: Bootstrap 5 with Sneat Admin Template
+- JavaScript: jQuery for DOM manipulation & AJAX calls
+
+## CODE STYLE & ARCHITECTURE RULES
+
+### 1. LARAVEL (BACKEND)
+- Ikuti standar PSR-12.
+- Gunakan Eloquent ORM untuk query database, hindari raw SQL kecuali sangat diperlukan.
+- Untuk respon AJAX, kembalikan format JSON standar:
+  `return response()->json(['success' => true, 'message' => '...', 'data' => $data]);`
+- Selalu sertakan validasi request menggunakan `$request->validate()` atau Form Request.
+
+### 2. FRONTEND & SNEAT TEMPLATE (BOOTSTRAP 5)
+- Gunakan struktur komponen dan class bawaan dari Sneat Template (misal: `card`, `table-responsive`, `btn-primary`, `modal-content`).
+- Jangan buat CSS kostum baru jika sudah ada class bawaan Bootstrap 5 / Sneat yang bisa digunakan.
+
+### 3. JQUERY & AJAX
+- Selalu sertakan header CSRF Token pada setiap request AJAX POST/PUT/DELETE:
+  `headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }`
+- Gunakan penanganan error AJAX yang rapi (`error: function(xhr) { ... }`) untuk menangkap error validasi dari Laravel.
+- Gunakan manipulasi DOM jQuery yang bersih untuk mengupdate UI setelah AJAX berhasil.

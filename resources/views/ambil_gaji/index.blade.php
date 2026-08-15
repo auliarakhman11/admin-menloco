@@ -22,7 +22,7 @@
                         <form action="" method="get">
                             <div class="row">
                                 <div class="col-12">
-                                    <h5 class="float-start">Laporan Pendapatan</h5>
+                                    <h5 class="float-start">Laporan Pendapatan Capster</h5>
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <div class="form-group">
@@ -221,7 +221,8 @@
                             <div class="col-12 mb-2">
                                 <div class="form-group">
                                     <label for="">Jumlah</label>
-                                    <input type="number" name="jumlah" id="jumlah" class="form-control" min="0" required>
+                                    <input type="number" name="jumlah" id="jumlah" class="form-control"
+                                        min="0" required>
                                 </div>
                             </div>
 
@@ -396,12 +397,14 @@
                             $('#info_sisa_maksimal').text(formatRupiah(data.sisa_maksimal));
 
                             $('#info_gaji_container').removeClass('d-none');
-                            $('#jumlah').prop('disabled', false).attr('max', sisaMaksimalGaji).data('sisa-maksimal', sisaMaksimalGaji);
+                            $('#jumlah').prop('disabled', false).attr('max', sisaMaksimalGaji).data(
+                                'sisa-maksimal', sisaMaksimalGaji);
                         }
                     },
                     error: function(xhr) {
                         $('#info_gaji_container').addClass('d-none');
-                        $('#jumlah').prop('disabled', false).removeAttr('max').removeData('sisa-maksimal');
+                        $('#jumlah').prop('disabled', false).removeAttr('max').removeData(
+                            'sisa-maksimal');
                         sisaMaksimalGaji = 0;
 
                         var message = 'Gagal mengambil data kalkulasi gaji.';
@@ -452,7 +455,8 @@
                             icon: 'warning',
                             position: 'top-end',
                             title: 'Peringatan',
-                            text: 'Nominal melebihi sisa batas maksimal gaji yang bisa diambil (' + formatRupiah(batas) + ')'
+                            text: 'Nominal melebihi sisa batas maksimal gaji yang bisa diambil (' +
+                                formatRupiah(batas) + ')'
                         });
                     }
                     $('#jumlah').val(batas);

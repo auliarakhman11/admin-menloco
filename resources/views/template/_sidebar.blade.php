@@ -59,7 +59,7 @@
                 </ul>
             </li>
             <li
-                class="menu-item {{ Request::is(['pengeluaran', 'dashboard', 'kasbon', 'ambilGaji']) ? 'active open' : '' }}">
+                class="menu-item {{ Request::is(['pengeluaran', 'dashboard', 'kasbon', 'ambilGaji', 'laporan-keuangan']) ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-calculator'></i>
                     <div data-i18n="Accounting">Accounting</div>
@@ -72,6 +72,12 @@
                         </a>
                     </li>
 
+                    <li class="menu-item {{ Request::is('laporan-keuangan') ? 'active' : '' }}">
+                        <a href="{{ route('laporan-keuangan.index') }}" class="menu-link">
+                            <div data-i18n="Laporan Keuangan">Laporan Keuangan</div>
+                        </a>
+                    </li>
+
                     <li class="menu-item {{ Request::is('pengeluaran') ? 'active' : '' }}">
                         <a href="{{ route('pengeluaran') }}" class="menu-link">
                             <div data-i18n="Laporan Pengeluaran">Laporan Pengeluaran</div>
@@ -80,13 +86,13 @@
 
                     <li class="menu-item {{ Request::is('kasbon') ? 'active' : '' }}">
                         <a href="{{ route('kasbon') }}" class="menu-link">
-                            <div data-i18n="Laporan Piutang">Laporan Piutang</div>
+                            <div data-i18n="Laporan Kasbon">Laporan Kasbon</div>
                         </a>
                     </li>
 
                     <li class="menu-item {{ Request::is('ambilGaji') ? 'active' : '' }}">
                         <a href="{{ route('ambilGaji') }}" class="menu-link">
-                            <div data-i18n="Laporan Pendapatan">Laporan Pendapatan</div>
+                            <div data-i18n="Laporan Pendapatan Capster">Laporan Pendapatan Capster</div>
                         </a>
                     </li>
 

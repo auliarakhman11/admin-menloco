@@ -14,6 +14,6 @@ class PengeluaranAkun extends Model
 
     public function akun()
     {
-        return $this->belongsTo(Akun::class, 'aksun_id', 'id');
+        return $this->belongsTo(Akun::class, 'akun_id', 'id');
     }
 }
