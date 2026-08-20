@@ -13,6 +13,7 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LaporanKeuanganController;
+use App\Http\Controllers\PenarikanLabaController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -70,9 +71,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/laporan-keuangan/pendapatan-dll', [LaporanKeuanganController::class, 'storePendapatanDll'])->name('laporan-keuangan.store-pendapatan-dll');
         Route::delete('/laporan-keuangan/pendapatan-dll/{id}', [LaporanKeuanganController::class, 'destroyPendapatanDll'])->name('laporan-keuangan.destroy-pendapatan-dll');
         Route::post('/laporan-keuangan/dana', [LaporanKeuanganController::class, 'storeDana'])->name('laporan-keuangan.store-dana');
+        Route::post('storeDanaKeluar', [LaporanKeuanganController::class, 'storeDanaKeluar'])->name('storeDanaKeluar');
+        Route::post('storeSaldoDana', [LaporanKeuanganController::class, 'storeSaldoDana'])->name('storeSaldoDana');
+        Route::post('storeSaldoDanaKeluar', [LaporanKeuanganController::class, 'storeSaldoDanaKeluar'])->name('storeSaldoDanaKeluar');
         Route::delete('/laporan-keuangan/dana/{id}', [LaporanKeuanganController::class, 'destroyDana'])->name('laporan-keuangan.destroy-dana');
         Route::post('/laporan-keuangan/produk', [LaporanKeuanganController::class, 'storeProduk'])->name('laporan-keuangan.store-produk');
         Route::delete('/laporan-keuangan/produk/{id}', [LaporanKeuanganController::class, 'destroyProduk'])->name('laporan-keuangan.destroy-produk');
+        Route::post('/penarikan-laba', [PenarikanLabaController::class, 'store'])->name('penarikan.store');
 
         //jurnal
         Route::get('pengeluaran', [JurnalController::class, 'pengeluaran'])->name('pengeluaran');

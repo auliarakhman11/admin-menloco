@@ -9,7 +9,7 @@ class Dana extends Model
 {
     use HasFactory;
     protected $table = 'dana';
-    protected $fillable = ['tgl', 'jenis', 'jumlah', 'ket', 'user_id'];
+    protected $fillable = ['tgl', 'jenis', 'jenis_dana', 'jenis_saldo', 'jumlah', 'ket', 'user_id'];
 
     public function user()
     {

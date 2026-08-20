@@ -1,6 +1,3 @@
-Berikut adalah isi dokumentasi lengkap dalam format Markdown (`LOGIKA_SALDO_BERJALAN.md`) yang mencakup struktur query Laravel dan skenario kalkulasinya:
-
-```markdown
 # Logika & Kalkulasi Saldo Berjalan Investor (Carry-Over Balance)
 
 Dokumentasi implementasi kalkulasi saldo akumulatif ( Pokok, DIV, dan Total ) berdasarkan saldo akhir dari bulan sebelumnya.
@@ -24,15 +21,12 @@ $$\text{Saldo Awal (Bulan } N) = \text{Saldo Akhir (Bulan } N-1)$$
 
 ## 2. Implementasi Service / Helper (Laravel)
 
-Buat file baru atau tambahkan metode ini di Controller/Service Anda untuk menghitung saldo berjalan per investor berdasarkan periode tanggal/bulan:
+File `app/Services/SaldoInvestorService.php`:
 
 ```php
 namespace App\Services;
 
 use App\Models\Investor;
-use App\Models\SetoranPokok;   // Adjust table name
-use App\Models\PenarikanPokok; // Adjust table name
-use App\Models\BagiHasil;      // Adjust table name
 use App\Models\PenarikanLaba;  // Model penarikan_laba
 use Carbon\Carbon;
 
@@ -41,53 +35,34 @@ class SaldoInvestorService
     /**
      * Hitung ringkasan saldo berjalan investor pada bulan/tahun tertentu
      */
-    public function getSaldoBerjalan($investorId, $bulan,$tahun)
+    public function getSaldoBerjalan($investorId, $bulan, $tahun)
     {
         // Tanggal batas awal bulan yang dipilih
-        $startOfMonth = Carbon::createFromDate($tahun,$bulan, 1)->startOfMonth();
+        $startOfMonth = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
 
         // -------------------------------------------------------------
         // 1. HITUNG SALDO AWAL (Akumulasi SEMUA transaksi sebelum bulan ini)
         // -------------------------------------------------------------
-        $totalSetoranPokokLalu = SetoranPokok::where('investor_id',$investorId)
-            ->where('tgl', '<', $startOfMonth)
-            ->sum('jumlah');
+        $totalSetoranPokokLalu = 0;
+        $totalTarikPokokLalu   = 0;
+        $totalBagiHasilLalu    = 0;
 
-        $totalTarikPokokLalu = PenarikanPokok::where('investor_id',$investorId)
-            ->where('tgl', '<', $startOfMonth)
-            ->sum('jumlah');
-
-        $totalBagiHasilLalu = BagiHasil::where('investor_id',$investorId)
-            ->where('tgl', '<', $startOfMonth)
-            ->sum('jumlah');
-
-        $totalTarikLabaLalu = PenarikanLaba::where('investor_id',$investorId)
+        $totalTarikLabaLalu = PenarikanLaba::where('investor_id', $investorId)
             ->where('tgl', '<', $startOfMonth)
             ->sum('jumlah');
 
         // Saldo Awal Pokok & DIV untuk bulan ini
-        $saldoAwalPokok = $totalSetoranPokokLalu -$totalTarikPokokLalu;
-        $saldoAwalDiv   = $totalBagiHasilLalu -$totalTarikLabaLalu;
+        $saldoAwalPokok = $totalSetoranPokokLalu - $totalTarikPokokLalu;
+        $saldoAwalDiv   = $totalBagiHasilLalu - $totalTarikLabaLalu;
 
         // -------------------------------------------------------------
         // 2. HITUNG MUTASI BULAN INI
         // -------------------------------------------------------------
-        $setorPokokBulanIni = SetoranPokok::where('investor_id',$investorId)
-            ->whereMonth('tgl', $bulan)
-            ->whereYear('tgl', $tahun)
-            ->sum('jumlah');
+        $setorPokokBulanIni = 0;
+        $tarikPokokBulanIni = 0;
+        $bagiHasilBulanIni  = 0;
 
-        $tarikPokokBulanIni = PenarikanPokok::where('investor_id',$investorId)
-            ->whereMonth('tgl', $bulan)
-            ->whereYear('tgl', $tahun)
-            ->sum('jumlah');
-
-        $bagiHasilBulanIni = BagiHasil::where('investor_id',$investorId)
-            ->whereMonth('tgl', $bulan)
-            ->whereYear('tgl', $tahun)
-            ->sum('jumlah');
-
-        $tarikLabaBulanIni = PenarikanLaba::where('investor_id',$investorId)
+        $tarikLabaBulanIni = PenarikanLaba::where('investor_id', $investorId)
             ->whereMonth('tgl', $bulan)
             ->whereYear('tgl', $tahun)
             ->sum('jumlah');
@@ -95,14 +70,14 @@ class SaldoInvestorService
         // -------------------------------------------------------------
         // 3. HITUNG SALDO AKHIR BULAN INI
         // -------------------------------------------------------------
-        $saldoAkhirPokok =$saldoAwalPokok + $setorPokokBulanIni -$tarikPokokBulanIni;
-        $saldoAkhirDiv   =$saldoAwalDiv + $bagiHasilBulanIni -$tarikLabaBulanIni;
-        $saldoTotal      = $saldoAkhirPokok +$saldoAkhirDiv;
+        $saldoAkhirPokok = $saldoAwalPokok + $setorPokokBulanIni - $tarikPokokBulanIni;
+        $saldoAkhirDiv   = $saldoAwalDiv + $bagiHasilBulanIni - $tarikLabaBulanIni;
+        $saldoTotal      = $saldoAkhirPokok + $saldoAkhirDiv;
 
         return [
             'saldo_awal_pokok'  => $saldoAwalPokok,
             'saldo_awal_div'    => $saldoAwalDiv,
-            'saldo_awal_total'  => $saldoAwalPokok +$saldoAwalDiv,
+            'saldo_awal_total'  => $saldoAwalPokok + $saldoAwalDiv,
             
             'mutasi' => [
                 'setor_pokok'  => $setorPokokBulanIni,
@@ -117,7 +92,6 @@ class SaldoInvestorService
         ];
     }
 }
-
 ```
 
 ---
@@ -132,18 +106,17 @@ use App\Services\SaldoInvestorService;
 
 class LaporanInvestorController extends Controller
 {
-    public function index(Request $request, SaldoInvestorService$saldoService)
+    public function index(Request $request, SaldoInvestorService $saldoService)
     {
-        $investorId =$request->get('investor_id');
-        $bulan      =$request->get('bulan', date('m'));
-        $tahun      =$request->get('tahun', date('Y'));
+        $investorId = $request->get('investor_id');
+        $bulan      = $request->get('bulan', date('m'));
+        $tahun      = $request->get('tahun', date('Y'));
 
-        $laporanSaldo = $saldoService->getSaldoBerjalan($investorId, $bulan,$tahun);
+        $laporanSaldo = $saldoService->getSaldoBerjalan($investorId, $bulan, $tahun);
 
         return view('laporan.investor', compact('laporanSaldo', 'bulan', 'tahun'));
     }
 }
-
 ```
 
 ---
@@ -165,9 +138,4 @@ class LaporanInvestorController extends Controller
   "saldo_akhir_div": 1000000,
   "saldo_total": 13000000
 }
-
-```
-
-```
-
 ```
