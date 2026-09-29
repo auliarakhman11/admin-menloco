@@ -19,9 +19,9 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="float-start">Data Diskon</h5>
+                        <h5 class="float-start">Data Akun</h5>
                         <button type="button" class="btn btn-sm btn-primary float-end" data-bs-toggle="modal"
-                            data-bs-target="#modal_add_diskon"><i class='bx bxs-plus-circle'></i> Tambah Data</button>
+                            data-bs-target="#modal_add_akun"><i class='bx bxs-plus-circle'></i> Tambah Akun</button>
                     </div>
 
                     <div class="card-body">
@@ -31,9 +31,8 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Nama Diskon</th>
-                                        <th>Jumlah</th>
-                                        <th>Status</th>
+                                        <th>Nama Akun</th>
+                                        <th>Pengeluaran</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -41,29 +40,24 @@
                                     @php
                                         $i = 1;
                                     @endphp
-                                    @foreach ($diskon as $d)
+                                    @foreach ($akun as $d)
                                         <tr>
                                             <td>{{ $i++ }}</td>
-                                            <td>{{ $d->nm_diskon }}</td>
+                                            <td>{{ $d->nm_akun }}</td>
                                             <td>
-                                                @if ($d->jumlah > 100)
-                                                    Rp. {{ number_format($d->jumlah, 0) }}
+                                                @if ($d->jml_pengeluaran > 100)
+                                                    Rp. {{ number_format($d->jml_pengeluaran, 0) }}
                                                 @else
-                                                    {{ $d->jumlah }}%
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($d->void)
-                                                    Tidak Aktif
-                                                @else
-                                                    Aktif
+                                                    {{ $d->jml_pengeluaran }}%
                                                 @endif
                                             </td>
                                             <td>
                                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#modal_edit_diskon{{ $d->id }}"><i
+                                                    data-bs-target="#modal_edit_akun{{ $d->id }}"><i
                                                         class='bx bxs-message-square-edit'></i></button>
-
+                                                <a href="{{ route('deleteAkun', $d->id) }}"
+                                                    onclick="return confirm('Apakah anda yakin ingin menghapus akun ini? Data jurnal dan pengeluaran terkait juga akan ikut terhapus.');"
+                                                    class="btn btn-sm btn-danger"><i class='bx bxs-trash'></i></a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -104,14 +98,13 @@
 
     <!-- Modal -->
 
-    <form id="form_add_diskon" method="POST" action="{{ route('addDiskon') }}">
+    <form id="form_add_akun" method="POST" action="{{ route('addAkun') }}">
         @csrf
-        <div class="modal fade" id="modal_add_diskon" tabindex="-1" aria-labelledby="modal_add_diskonLabel"
-            aria-hidden="true">
+        <div class="modal fade" id="modal_add_akun" tabindex="-1" aria-labelledby="modal_add_akunLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered ">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modal_add_diskonLabel">Tambah Diskon</h5>
+                        <h5 class="modal-title" id="modal_add_akunLabel">Tambah Akun</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -119,15 +112,15 @@
 
                             <div class="col-12 mb-2">
                                 <div class="form-group">
-                                    <label for="">Nama Diskon</label>
-                                    <input type="text" name="nm_diskon" class="form-control" required>
+                                    <label for="">Nama Akun</label>
+                                    <input type="text" name="nm_akun" class="form-control" required>
                                 </div>
                             </div>
 
                             <div class="col-12 mb-2">
                                 <div class="form-group">
-                                    <label for="">Jumlah Diskon</label>
-                                    <input type="text" name="jumlah" class="form-control" required>
+                                    <label for="">Jumlah Pengeluaran</label>
+                                    <input type="text" name="jml_pengeluaran" class="form-control" required>
                                 </div>
                             </div>
 
@@ -143,16 +136,16 @@
         </div>
     </form>
 
-    @foreach ($diskon as $d)
-        <form method="POST" action="{{ route('editDiskon') }}">
+    @foreach ($akun as $d)
+        <form method="POST" action="{{ route('editAkun') }}">
             @csrf
             @method('patch')
-            <div class="modal fade" id="modal_edit_diskon{{ $d->id }}" tabindex="-1"
-                aria-labelledby="modal_edit_diskonLabel" aria-hidden="true">
+            <div class="modal fade" id="modal_edit_akun{{ $d->id }}" tabindex="-1"
+                aria-labelledby="modal_edit_akunLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered ">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="modal_edit_diskonLabel">Tambah Diskon</h5>
+                            <h5 class="modal-title" id="modal_edit_akunLabel">Edit Akun</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -162,28 +155,17 @@
 
                                 <div class="col-12 mb-2">
                                     <div class="form-group">
-                                        <label for="">Nama Diskon</label>
-                                        <input type="text" name="nm_diskon" class="form-control"
-                                            value="{{ $d->nm_diskon }}" required>
+                                        <label for="">Nama Akun</label>
+                                        <input type="text" name="nm_akun" class="form-control"
+                                            value="{{ $d->nm_akun }}" required>
                                     </div>
                                 </div>
 
                                 <div class="col-12 mb-2">
                                     <div class="form-group">
-                                        <label for="">Jumlah Diskon</label>
-                                        <input type="text" name="jumlah" class="form-control"
-                                            value="{{ $d->jumlah }}" required>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 mb-2">
-                                    <div class="form-group">
-                                        <label for="">Aktif</label>
-                                        <select name="void" class="form-control">
-                                            <option value="0" {{ $d->void == 0 ? 'selected' : '' }}>Aktif</option>
-                                            <option value="1" {{ $d->void == 1 ? 'selected' : '' }}>Tidak Akatif
-                                            </option>
-                                        </select>
+                                        <label for="">Jumlah Pengeluaran</label>
+                                        <input type="text" name="jml_pengeluaran" class="form-control"
+                                            value="{{ $d->jml_pengeluaran }}" required>
                                     </div>
                                 </div>
 
@@ -249,7 +231,7 @@
             <?php endif; ?>
 
 
-            $(document).on('submit', '#form_add_diskon', function(event) {
+            $(document).on('submit', '#form_add_akun', function(event) {
                 $('#btn_add_diskon').attr('disabled', true);
                 $('#btn_add_diskon').html('Loading...');
 

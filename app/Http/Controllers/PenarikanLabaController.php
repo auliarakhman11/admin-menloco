@@ -19,6 +19,8 @@ class PenarikanLabaController extends Controller
             'investor_id' => $request->investor_id,
             'tgl'         => $request->tgl,
             'jumlah'      => $request->jumlah,
+            'jenis' => $request->jenis,
+            'pembayaran_id' => $request->pembayaran_id,
         ]);
 
         return redirect()->back()->with('success', 'Penarikan laba berhasil dicatat.');

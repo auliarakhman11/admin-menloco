@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AkunController;
 use App\Http\Controllers\AmbilGajiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CabangController;
 use App\Http\Controllers\DiskonController;
+use App\Http\Controllers\DivController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\JurnalController;
 use App\Http\Controllers\KaryawanController;
@@ -78,6 +80,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/laporan-keuangan/produk', [LaporanKeuanganController::class, 'storeProduk'])->name('laporan-keuangan.store-produk');
         Route::delete('/laporan-keuangan/produk/{id}', [LaporanKeuanganController::class, 'destroyProduk'])->name('laporan-keuangan.destroy-produk');
         Route::post('/penarikan-laba', [PenarikanLabaController::class, 'store'])->name('penarikan.store');
+        Route::post('storeSaldoOperasional', [LaporanKeuanganController::class, 'storeSaldoOperasional'])->name('storeSaldoOperasional');
+        Route::get('deleteSaldoOperasional/{id}', [LaporanKeuanganController::class, 'deleteSaldoOperasional'])->name('deleteSaldoOperasional');
+        Route::post('storeSaldoGaji', [LaporanKeuanganController::class, 'storeSaldoGaji'])->name('storeSaldoGaji');
+        Route::get('deleteSaldoGaji/{id}', [LaporanKeuanganController::class, 'deleteSaldoGaji'])->name('deleteSaldoGaji');
 
         //jurnal
         Route::get('pengeluaran', [JurnalController::class, 'pengeluaran'])->name('pengeluaran');
@@ -102,6 +108,11 @@ Route::middleware('auth')->group(function () {
         Route::patch('editAmbilGaji', [AmbilGajiController::class, 'editAmbilGaji'])->name('editAmbilGaji');
         Route::get('deleteAmbilGaji/{id}', [AmbilGajiController::class, 'deleteAmbilGaji'])->name('deleteAmbilGaji');
         //endAmbilGaji
+
+        //div
+        Route::get('div', [DivController::class, 'index'])->name('div');
+        Route::patch('editDiv', [DivController::class, 'editDiv'])->name('editDiv');
+        //end div
     });
 
 
@@ -151,6 +162,18 @@ Route::middleware('auth')->group(function () {
         Route::get('deleteKaryawan/{id}', [KaryawanController::class, 'deleteKaryawan'])->name('deleteKaryawan');
         //end karyawan
 
+        //akun
+        Route::get('akun', [AkunController::class, 'index'])->name('akun');
+        Route::post('addAkun', [AkunController::class, 'addAkun'])->name('addAkun');
+        Route::patch('editAkun', [AkunController::class, 'editAkun'])->name('editAkun');
+        Route::get('deleteAkun/{id}', [AkunController::class, 'deleteAkun'])->name('deleteAkun');
+        //endakun
+
+        //laba
+        Route::post('penarikanLaba', [LaporanKeuanganController::class, 'penarikanLaba'])->name('penarikanLaba');
+        Route::delete('deletePenarikanDana/{id}', [LaporanKeuanganController::class, 'deletePenarikanDana'])->name('deletePenarikanDana');
+        //end Laba
+
     });
 
 
@@ -167,9 +190,11 @@ Route::middleware('auth')->group(function () {
 });
 
 
-
+Route::get('inputPokok', [LaporanKeuanganController::class, 'inputPokok'])->name('inputPokok');
+Route::get('inputDiv', [LaporanKeuanganController::class, 'inputDiv'])->name('inputDiv');
 
 Route::middleware('guest')->group(function () {
+
     Route::get('login', [AuthController::class, 'login_page'])->name('loginPage');
     Route::post('login', [AuthController::class, 'login'])->name('login');
 });

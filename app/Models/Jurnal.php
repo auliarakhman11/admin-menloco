@@ -9,7 +9,7 @@ class Jurnal extends Model
 {
     use HasFactory;
     protected $table = 'jurnal';
-    protected $fillable = ['cabang_id', 'akun_id', 'jumlah', 'ket', 'jenis', 'tgl', 'void', 'user_id'];
+    protected $fillable = ['cabang_id', 'akun_id', 'pembayaran_id', 'jumlah', 'ket', 'jenis', 'tgl', 'void', 'user_id'];
 
     public function akun()
     {

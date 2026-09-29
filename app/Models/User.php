@@ -49,4 +49,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(AksesCabang::class, 'user_id', 'id');
     }
+
+    public function saldoOperasional()
+    {
+        return $this->hasMany(SaldoOperasional::class, 'user_id', 'id');
+    }
+
+    public function saldoGaji()
+    {
+        return $this->hasMany(SaldoGaji::class, 'user_id', 'id');
+    }
 }

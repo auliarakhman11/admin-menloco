@@ -15,12 +15,16 @@ class PenarikanLaba extends Model
         'investor_id',
         'tgl',
         'jumlah',
+        'jenis',
+        'pembayaran_id'
     ];
 
-    protected $casts = [
-        'tgl' => 'date',
-        'jumlah' => 'double',
-    ];
+    // protected $casts = [
+    //     'tgl' => 'date',
+    //     'jumlah' => 'double',
+    //     'jenis' => 'int',
+    //     'pembayaran_id' => 'int'
+    // ];
 
     /**
      * Relasi ke model Investor (Belongs To)

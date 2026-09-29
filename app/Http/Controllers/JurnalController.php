@@ -287,16 +287,45 @@ class JurnalController extends Controller
 
     public function addPengeluaran(Request $request)
     {
-        Jurnal::create([
-            'cabang_id' => $request->cabang_id,
-            'akun_id' => $request->akun_id,
-            'jumlah' => $request->jumlah,
-            'ket' => $request->ket,
-            'jenis' => 2,
-            'tgl' => $request->tgl,
-            'void' => 0,
-            'user_id' => Auth::id()
-        ]);
+
+        if ($request->akun_id == 8) {
+            Jurnal::create([
+                'cabang_id' => $request->cabang_id,
+                'akun_id' => $request->akun_id,
+                'jumlah' => $request->jumlah,
+                'ket' => $request->ket,
+                'jenis' => 1,
+                'pembayaran_id' => $request->pembayaran_id,
+                'tgl' => $request->tgl,
+                'void' => 0,
+                'user_id' => Auth::id()
+            ]);
+
+            Jurnal::create([
+                'cabang_id' => $request->cabang_id,
+                'akun_id' => $request->akun_id,
+                'jumlah' => $request->jumlah,
+                'ket' => $request->ket,
+                'jenis' => 2,
+                'pembayaran_id' => $request->pembayaran_id,
+                'tgl' => $request->tgl,
+                'void' => 0,
+                'user_id' => Auth::id()
+            ]);
+        } else {
+            Jurnal::create([
+                'cabang_id' => $request->cabang_id,
+                'akun_id' => $request->akun_id,
+                'jumlah' => $request->jumlah,
+                'ket' => $request->ket,
+                'jenis' => $request->jenis,
+                'pembayaran_id' => $request->pembayaran_id,
+                'tgl' => $request->tgl,
+                'void' => 0,
+                'user_id' => Auth::id()
+            ]);
+        }
+
 
         return redirect()->back()->with('success', 'Data berhasil dibuat');
     }
@@ -318,7 +347,7 @@ class JurnalController extends Controller
     public function deletePengeluaran($id)
     {
         Jurnal::where('id', $id)->update([
-            'void' => $id,
+            'void' => 1,
         ]);
 
         return redirect()->back()->with('success', 'Data berhasil dihapus');
