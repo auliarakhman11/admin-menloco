@@ -18,7 +18,7 @@ class DivController extends Controller
     public function editDiv(Request $request)
     {
         Div::where('id', $request->id)->update([
-            'jml_pengeluaran' => $request->jml_pengeluaran
+            'jml_pengeluaran' => 0
         ]);
 
         return redirect()->back()->with('success', 'Data akun berhasil diubah');

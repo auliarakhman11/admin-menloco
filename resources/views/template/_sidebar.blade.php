@@ -151,11 +151,11 @@
                             </a>
                         </li>
 
-                        <li class="menu-item {{ Request::is('div') ? 'active' : '' }}">
+                        {{-- <li class="menu-item {{ Request::is('div') ? 'active' : '' }}">
                             <a href="{{ route('div') }}" class="menu-link">
                                 <div data-i18n="div">DIV</div>
                             </a>
-                        </li>
+                        </li> --}}
 
                     </ul>
                 </li>

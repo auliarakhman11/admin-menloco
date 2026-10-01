@@ -14,6 +14,8 @@ use App\Models\Kasbon;
 use App\Models\PembelianProduk;
 use App\Models\PenarikanLaba;
 use App\Models\Pendapatan;
+use App\Models\PengeluaranAkun;
+use App\Models\PengeluaranDiv;
 use App\Models\Penjualan;
 use App\Models\PenjualanKaryawan;
 use App\Models\SaldoGaji;
@@ -1051,35 +1053,33 @@ class LaporanKeuanganController extends Controller
 
         $dat_pengeluaran = [];
 
-        $cabang = Cabang::where('off', 0)->get();
-        $pengeluaran = Akun::where('jml_pengeluaran', '>', 100)->get();
+        // $cabang = Cabang::where('off', 0)->get();
+        $pengeluaran = PengeluaranAkun::where('jenis', 1)->where('jumlah', '>', 0)->get();
 
         foreach ($pengeluaran as $d) {
 
             if (date('m-d') == '03-28') continue;
 
             if (date('d') != 31) {
-                foreach ($cabang as $c) {
-                    $dat_pengeluaran[] = [
-                        'cabang_id' => $c->id,
-                        'akun_id' => $d->id,
-                        'jumlah' => $d->jml_pengeluaran / 30,
-                        'ket' => 'Pengeluaran Harian ' . $d->nm_akun,
-                        'jenis' => 1,
-                        'pembayaran_id' => 1,
-                        'tgl' => $tgl,
-                        'void' => 0,
-                        'user_id' => $admin,
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'updated_at' => date('Y-m-d H:i:s'),
-                    ];
-                }
+                $dat_pengeluaran[] = [
+                    'cabang_id' => $d->cabang_id,
+                    'akun_id' => $d->akun_id,
+                    'jumlah' => $d->jumlah / 30,
+                    'ket' => 'Pengeluaran Harian ' . $d->akun->nm_akun,
+                    'jenis' => 1,
+                    'pembayaran_id' => 1,
+                    'tgl' => $tgl,
+                    'void' => 0,
+                    'user_id' => $admin,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
             }
         }
 
         $dat_div = [];
 
-        $div = Div::where('jml_pengeluaran', '>', 100)->get();
+        $div = PengeluaranDiv::where('jenis', 1)->where('jumlah', '>', 0)->get();
 
         foreach ($div as $d) {
 
@@ -1088,9 +1088,10 @@ class LaporanKeuanganController extends Controller
             if (date('d') != 31) {
                 $dat_div[] = [
                     'tgl' => $tgl,
-                    'jenis' => $d->nm_div,
-                    'jumlah' => $d->jml_pengeluaran / 30,
-                    'ket' => 'Pengeluaran Harian ' . $d->nm_div,
+                    'cabang_id' => $d->cabang_id,
+                    'jenis' => $d->div->nm_div,
+                    'jumlah' => $d->jumlah / 30,
+                    'ket' => 'Pengeluaran Harian ' . $d->div->nm_div,
                     'pembayaran_id' => 1,
                     'jenis_dana' => 1,
                     'jenis_saldo' => 2,

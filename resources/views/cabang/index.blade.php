@@ -207,9 +207,12 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                         </div>
+
                         <div class="modal-body">
                             <div class="row">
-
+                                <div class="col-12">
+                                    <h5>Pengeluaran Akun</h5>
+                                </div>
                                 <input type="hidden" name="id" value="{{ $d->id }}">
 
                                 <div class="col-4 mb-2">
@@ -249,7 +252,7 @@
                                         <div class="col-3 mb-2">
                                             <div class="form-group">
                                                 <select name="jenis[]" class="form-control" required>
-                                                    <option value="1" {{ 1 == $p->jenis ? 'selected' : '' }}>Harian
+                                                    <option value="1" {{ 1 == $p->jenis ? 'selected' : '' }}>Bulanan
                                                     </option>
                                                     <option value="2" {{ 2 == $p->jenis ? 'selected' : '' }}>
                                                         Pertransaksi</option>
@@ -281,7 +284,7 @@
                                     <div class="col-3 mb-2">
                                         <div class="form-group">
                                             <select name="jenis[]" class="form-control" required>
-                                                <option value="1">Harian</option>
+                                                <option value="1">Bulanan</option>
                                                 <option value="2">Pertransaksi</option>
                                             </select>
                                         </div>
@@ -302,6 +305,104 @@
                             </div>
                             <div id="tambah_table_pengeluaran{{ $d->id }}"></div>
                         </div>
+
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5>Pengeluaran DIV</h5>
+                                </div>
+
+                                <div class="col-4 mb-2">
+                                    <div class="form-group">
+                                        <label for="">DIV</label>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Jenis</label>
+                                    </div>
+                                </div>
+                                <div class="col-3 mb-2">
+                                    <div class="form-group">
+                                        <label for="">Jumlah</label>
+                                    </div>
+                                </div>
+                                <div class="col-2 mb-2">
+                                    <button type="button" class="btn btn-sm btn-primary btn_tambah_div"
+                                        id="btn_tambah_div{{ $d->id }}" cabang_id="{{ $d->id }}"><i
+                                            class="bx bxs-plus-circle"></i></button>
+                                </div>
+
+                                @if ($d->pengeluaranDiv->count() > 0)
+                                    @foreach ($d->pengeluaranDiv as $di)
+                                        <div class="col-4 mb-2">
+                                            <div class="form-group">
+                                                <select name="div_id[]" class="form-control" required>
+                                                    @foreach ($div as $d)
+                                                        <option value="{{ $d->id }}"
+                                                            {{ $d->id == $di->div_id ? 'selected' : '' }}>
+                                                            {{ $d->nm_div }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-3 mb-2">
+                                            <div class="form-group">
+                                                <select name="jenis_div[]" class="form-control" required>
+                                                    <option value="1" {{ 1 == $di->jenis ? 'selected' : '' }}>Bulanan
+                                                    </option>
+                                                    <option value="2" {{ 2 == $di->jenis ? 'selected' : '' }}>
+                                                        Pertransaksi</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-3 mb-2">
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" name="jumlah_div[]"
+                                                    value="{{ $di->jumlah }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-2 mt-2">
+                                            <a href="{{ route('deletePengeluaranDiv', $di->id) }}"
+                                                onclick="return confirm('Apakah anda yakin ingin menghapus data?');"
+                                                class="btn btn-sm btn-primary"><i class="bx bxs-trash"></i></a>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="col-4 mb-2">
+                                        <div class="form-group">
+                                            <select name="div_id[]" class="form-control" required>
+                                                @foreach ($div as $di)
+                                                    <option value="{{ $di->id }}">{{ $di->nm_div }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-3 mb-2">
+                                        <div class="form-group">
+                                            <select name="jenis_div[]" class="form-control" required>
+                                                <option value="1">Bulanan</option>
+                                                <option value="2">Pertransaksi</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-3 mb-2">
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" name="jumlah_div[]" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-2 mt-3">
+
+                                    </div>
+                                @endif
+
+
+
+
+                            </div>
+                            <div id="tambah_table_pengeluaran_div{{ $d->id }}"></div>
+                        </div>
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-primary">Save</button>
@@ -367,7 +468,7 @@
                     '<div class="col-4 mb-2"><div class="form-group"><select name="akun_id[]" class="form-control" required>@foreach ($akun as $a)<option value="{{ $a->id }}">{{ $a->nm_akun }}</option>@endforeach</select></div></div>';
 
                 html_code +=
-                    '<div class="col-3 mb-2"><div class="form-group"><select name="jenis[]" class="form-control" required><option value="1">Harian</option><option value="2">Pertransaksi</option></select></div></div>';
+                    '<div class="col-3 mb-2"><div class="form-group"><select name="jenis[]" class="form-control" required><option value="1">Bulanan</option><option value="2">Pertransaksi</option></select></div></div>';
 
                 html_code +=
                     '<div class="col-3 mb-2"><div class="form-group"><input type="number" name="jumlah[]" class="form-control" required></div></div>';
@@ -382,6 +483,37 @@
             });
 
             $(document).on('click', '.remove_pengeluaran', function() {
+                var delete_row = $(this).data("row");
+                $('#' + delete_row).remove();
+            });
+            //end pengeluaran
+
+            //pengeluaran
+            var count_div = 1;
+            $(document).on('click', '.btn_tambah_div', function() {
+                count_div = count_div + 1;
+                var cabang_id = $(this).attr('cabang_id');
+                var html_code = '<div class="row" id="row' + count_div + '">';
+
+                html_code +=
+                    '<div class="col-4 mb-2"><div class="form-group"><select name="div_id[]" class="form-control" required>@foreach ($div as $di)<option value="{{ $di->id }}">{{ $di->nm_div }}</option>@endforeach</select></div></div>';
+
+                html_code +=
+                    '<div class="col-3 mb-2"><div class="form-group"><select name="jenis_div[]" class="form-control" required><option value="1">Bulanan</option><option value="2">Pertransaksi</option></select></div></div>';
+
+                html_code +=
+                    '<div class="col-3 mb-2"><div class="form-group"><input type="number" name="jumlah_div[]" class="form-control" required></div></div>';
+
+                html_code += '<div class="col-2 mt-3"><button type="button" data-row="row' +
+                    count_div +
+                    '" class="btn btn-primary btn-sm remove_div"><i class="bx bx-minus"></i></button></div>';
+
+                html_code += "</div>";
+
+                $('#tambah_table_pengeluaran_div' + cabang_id).append(html_code);
+            });
+
+            $(document).on('click', '.remove_div', function() {
                 var delete_row = $(this).data("row");
                 $('#' + delete_row).remove();
             });

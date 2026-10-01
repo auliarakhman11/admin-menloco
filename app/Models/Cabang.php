@@ -21,6 +21,11 @@ class Cabang extends Model
         return $this->hasMany(PengeluaranAkun::class, 'cabang_id', 'id');
     }
 
+    public function pengeluaranDiv()
+    {
+        return $this->hasMany(PengeluaranDiv::class, 'cabang_id', 'id');
+    }
+
     public function saldoGaji()
     {
         return $this->hasMany(SaldoGaji::class, 'cabang_id', 'id');

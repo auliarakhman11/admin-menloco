@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Akun;
 use App\Models\Cabang;
+use App\Models\Div;
 use App\Models\PengeluaranAkun;
+use App\Models\PengeluaranDiv;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -14,8 +16,9 @@ class CabangController extends Controller
     {
         return view('cabang.index', [
             'title' => 'Cabang',
-            'cabang' => Cabang::with(['user', 'pengeluaranAkun'])->get(),
+            'cabang' => Cabang::with(['user', 'pengeluaranAkun', 'pengeluaranDiv'])->get(),
             'akun' => Akun::all(),
+            'div' => Div::all(),
         ]);
     }
 
@@ -79,6 +82,7 @@ class CabangController extends Controller
     public function addPengeluaranAkun(Request $request)
     {
 
+        //pengeluaran
         PengeluaranAkun::where('cabang_id', $request->id)->delete();
 
         $akun_id = $request->akun_id;
@@ -100,12 +104,44 @@ class CabangController extends Controller
 
         PengeluaranAkun::insert($pengeluaran);
 
+        //endPengeluaran
+
+        //pengeluaran
+        PengeluaranDiv::where('cabang_id', $request->id)->delete();
+
+        $div_id = $request->div_id;
+        $jenis_div = $request->jenis_div;
+        $jumlah_div = $request->jumlah_div;
+
+        $pengeluaranDiv = [];
+
+        for ($count = 0; $count < count($div_id); $count++) {
+            $pengeluaranDiv[] = [
+                'cabang_id' => $request->id,
+                'div_id' => $div_id[$count],
+                'jenis' => $jenis_div[$count],
+                'jumlah' => $jumlah_div[$count],
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+        }
+
+        PengeluaranDiv::insert($pengeluaranDiv);
+
+        //endPengeluaran
+
         return redirect()->back()->with('success', 'Data pengeluaran berhasil diubah');
     }
 
     public function deletePengeluaranAkun($id)
     {
         PengeluaranAkun::where('id', $id)->delete();
+        return redirect()->back()->with('success', 'Data pengeluaran berhasil diubah');
+    }
+
+    public function deletePengeluaranDiv($id)
+    {
+        PengeluaranDiv::where('id', $id)->delete();
         return redirect()->back()->with('success', 'Data pengeluaran berhasil diubah');
     }
 }

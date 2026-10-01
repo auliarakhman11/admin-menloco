@@ -153,6 +153,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('editCabang', [CabangController::class, 'editCabang'])->name('editCabang');
         Route::post('addPengeluaranAkun', [CabangController::class, 'addPengeluaranAkun'])->name('addPengeluaranAkun');
         Route::get('deletePengeluaranAkun/{id}', [CabangController::class, 'deletePengeluaranAkun'])->name('deletePengeluaranAkun');
+        Route::get('deletePengeluaranDiv/{id}', [CabangController::class, 'deletePengeluaranDiv'])->name('deletePengeluaranDiv');
         //end cabnag
 
         //karyawan

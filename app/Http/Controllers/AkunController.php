@@ -22,7 +22,7 @@ class AkunController extends Controller
     {
         Akun::create([
             'nm_akun' => $request->nm_akun,
-            'jml_pengeluaran' => $request->jml_pengeluaran
+            'jml_pengeluaran' => 0
         ]);
 
         return redirect()->back()->with('success', 'Data akun berhasil dibuat');
@@ -32,7 +32,7 @@ class AkunController extends Controller
     {
         Akun::where('id', $request->id)->update([
             'nm_akun' => $request->nm_akun,
-            'jml_pengeluaran' => $request->jml_pengeluaran
+            'jml_pengeluaran' => 0
         ]);
 
         return redirect()->back()->with('success', 'Data akun berhasil diubah');

@@ -32,7 +32,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Nama Akun</th>
-                                        <th>Pengeluaran</th>
+                                        {{-- <th>Pengeluaran</th> --}}
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -44,13 +44,13 @@
                                         <tr>
                                             <td>{{ $i++ }}</td>
                                             <td>{{ $d->nm_akun }}</td>
-                                            <td>
+                                            {{-- <td>
                                                 @if ($d->jml_pengeluaran > 100)
                                                     Rp. {{ number_format($d->jml_pengeluaran, 0) }}
                                                 @else
                                                     {{ $d->jml_pengeluaran }}%
                                                 @endif
-                                            </td>
+                                            </td> --}}
                                             <td>
                                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
                                                     data-bs-target="#modal_edit_akun{{ $d->id }}"><i
@@ -117,12 +117,12 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 mb-2">
+                            {{-- <div class="col-12 mb-2">
                                 <div class="form-group">
                                     <label for="">Jumlah Pengeluaran</label>
                                     <input type="text" name="jml_pengeluaran" class="form-control" required>
                                 </div>
-                            </div>
+                            </div> --}}
 
 
                         </div>
@@ -161,13 +161,13 @@
                                     </div>
                                 </div>
 
-                                <div class="col-12 mb-2">
+                                {{-- <div class="col-12 mb-2">
                                     <div class="form-group">
                                         <label for="">Jumlah Pengeluaran</label>
                                         <input type="text" name="jml_pengeluaran" class="form-control"
                                             value="{{ $d->jml_pengeluaran }}" required>
                                     </div>
-                                </div>
+                                </div> --}}
 
 
                             </div>
