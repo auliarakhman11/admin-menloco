@@ -1,0 +1,77 @@
+﻿    public function getRekapMutasiKas($startDate, $endDate, $cabang_id, $cutoffDate, $hasPast)
+    {
+        $allMutasiKas = MutasiKas::where('void', 0)
+            ->when($cabang_id && $cabang_id != 'all', function ($q) use ($cabang_id) {
+                $q->where('cabang_id', $cabang_id);
+            })
+            ->whereBetween('tgl', [$startDate, $endDate])
+            ->get();
+
+        $pastMutasiKas = collect();
+        if ($hasPast) {
+            $pastMutasiKas = MutasiKas::where('void', 0)
+                ->when($cabang_id && $cabang_id != 'all', function ($q) use ($cabang_id) {
+                    $q->where('cabang_id', $cabang_id);
+                })
+                ->whereBetween('tgl', ['2026-08-01', $cutoffDate])
+                ->get();
+        }
+
+        $pastMutasiInCash = $pastMutasiKas->where('tujuan_pembayaran_id', 1)->sum('jumlah');
+        $pastMutasiOutCash = $pastMutasiKas->where('sumber_pembayaran_id', 1)->sum('jumlah');
+        $pastMutasiNetCash = $pastMutasiInCash - $pastMutasiOutCash;
+
+        $pastMutasiInTransfer = $pastMutasiKas->where('tujuan_pembayaran_id', 2)->sum('jumlah');
+        $pastMutasiOutTransfer = $pastMutasiKas->where('sumber_pembayaran_id', 2)->sum('jumlah');
+        $pastMutasiNetTransfer = $pastMutasiInTransfer - $pastMutasiOutTransfer;
+
+        $currMutasiInCash = $allMutasiKas->where('tujuan_pembayaran_id', 1)->sum('jumlah');
+        $currMutasiOutCash = $allMutasiKas->where('sumber_pembayaran_id', 1)->sum('jumlah');
+        $currMutasiNetCash = $currMutasiInCash - $currMutasiOutCash;
+
+        $currMutasiInTransfer = $allMutasiKas->where('tujuan_pembayaran_id', 2)->sum('jumlah');
+        $currMutasiOutTransfer = $allMutasiKas->where('sumber_pembayaran_id', 2)->sum('jumlah');
+        $currMutasiNetTransfer = $currMutasiInTransfer - $currMutasiOutTransfer;
+
+        return (object)[
+            'past_net_cash' => $pastMutasiNetCash,
+            'past_net_transfer' => $pastMutasiNetTransfer,
+            'curr_net_cash' => $currMutasiNetCash,
+            'curr_net_transfer' => $currMutasiNetTransfer,
+            'list' => $allMutasiKas
+        ];
+    }
+
+    public function storeMutasiKas(Request $request)
+    {
+        $request->validate([
+            'tgl' => 'required|date',
+            'cabang_id' => 'required',
+            'sumber_pembayaran_id' => 'required|different:tujuan_pembayaran_id',
+            'tujuan_pembayaran_id' => 'required',
+            'jumlah' => 'required|numeric|min:1',
+            'ket' => 'required|string',
+        ]);
+
+        MutasiKas::create([
+            'tgl' => $request->tgl,
+            'cabang_id' => $request->cabang_id,
+            'sumber_pembayaran_id' => $request->sumber_pembayaran_id,
+            'tujuan_pembayaran_id' => $request->tujuan_pembayaran_id,
+            'jumlah' => $request->jumlah,
+            'ket' => $request->ket,
+            'void' => 0,
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()->back()->with('sukses', 'Mutasi Kas berhasil disimpan!');
+    }
+
+    public function voidMutasiKas($id)
+    {
+        $item = MutasiKas::findOrFail($id);
+        $item->update(['void' => 1]);
+
+        return redirect()->back()->with('sukses', 'Mutasi Kas berhasil dihapus/dibatalkan!');
+    }
+}

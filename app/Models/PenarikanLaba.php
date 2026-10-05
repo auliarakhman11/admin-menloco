@@ -16,7 +16,8 @@ class PenarikanLaba extends Model
         'tgl',
         'jumlah',
         'jenis',
-        'pembayaran_id'
+        'pembayaran_id',
+        'cabang_id'
     ];
 
     // protected $casts = [
@@ -32,5 +33,10 @@ class PenarikanLaba extends Model
     public function investor()
     {
         return $this->belongsTo(Investor::class, 'investor_id');
+    }
+
+    public function cabang()
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id', 'id');
     }
 }

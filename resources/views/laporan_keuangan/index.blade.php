@@ -17,17 +17,30 @@
                         <h5 class="mb-3">Filter Laporan Keuangan</h5>
                         <form action="{{ route('laporan-keuangan.index') }}" method="GET">
                             <div class="row g-3 align-items-end">
-                                <div class="col-md-4">
+
+                                <div class="col-md-3">
+                                    <label for="cabang_id" class="form-label">Cabang</label>
+                                    <select name="cabang_id" id="cabang_id" class="form-select">
+                                        <option value="all" {{ request('cabang_id') == 'all' ? 'selected' : '' }}>Semua
+                                            Cabang</option>
+                                        @foreach ($cabang as $c)
+                                            <option value="{{ $c->id }}"
+                                                {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
                                     <label for="start_date" class="form-label">Tanggal Mulai</label>
                                     <input type="date" id="start_date" name="start_date" class="form-control"
                                         value="{{ $startDate }}" required>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label for="end_date" class="form-label">Tanggal Selesai</label>
                                     <input type="date" id="end_date" name="end_date" class="form-control"
                                         value="{{ $endDate }}" required>
                                 </div>
-                                <div class="col-md-4 d-flex gap-2">
+                                <div class="col-md-3 d-flex gap-2">
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bx bx-filter-alt me-1"></i> Filter
                                     </button>
@@ -43,6 +56,9 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Laporan Keuangan Pemasukan</h5>
+                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalMutasiKas">
+                            <i class="bx bx-transfer-alt me-1"></i> Mutasi Kas
+                        </button>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive text-nowrap" style="overflow-x: auto;">
@@ -72,17 +88,34 @@
                                     @php
                                         // 1. Penarikan Laba
                                         $totalPenarikanLaba = $penarikanLaba->sum('jml_penarikan_laba');
-                                        $tarikLabaCashPeriode = (float)($detailPenarikanLaba->where('pembayaran_id', 1)->sum('jumlah'));
-                                        $tarikLabaTransferPeriode = (float)($detailPenarikanLaba->where('pembayaran_id', 2)->sum('jumlah'));
+                                        $tarikLabaCashPeriode = (float) $detailPenarikanLaba
+                                            ->where('pembayaran_id', 1)
+                                            ->sum('jumlah');
+                                        $tarikLabaTransferPeriode = (float) $detailPenarikanLaba
+                                            ->where('pembayaran_id', 2)
+                                            ->sum('jumlah');
 
                                         // 2. Pengeluaran Jasa (Gaji Capster + Jurnal Keluar + Dana Keluar + Penarikan Laba)
-                                        $jurnalKeluarCash = (float)$detail_jurnal_keluar->where('pembayaran_id', 1)->sum('jumlah');
-                                        $jurnalKeluarTransfer = (float)$detail_jurnal_keluar->where('pembayaran_id', 2)->sum('jumlah');
-                                        $danaKeluarCash = (float)$detailDanaKeluar->where('pembayaran_id', 1)->sum('jumlah');
-                                        $danaKeluarTransfer = (float)$detailDanaKeluar->where('pembayaran_id', 2)->sum('jumlah');
+                                        $jurnalKeluarCash = (float) $detail_jurnal_keluar
+                                            ->where('pembayaran_id', 1)
+                                            ->sum('jumlah');
+                                        $jurnalKeluarTransfer = (float) $detail_jurnal_keluar
+                                            ->where('pembayaran_id', 2)
+                                            ->sum('jumlah');
+                                        $danaKeluarCash = (float) $detailDanaKeluar
+                                            ->where('pembayaran_id', 1)
+                                            ->sum('jumlah');
+                                        $danaKeluarTransfer = (float) $detailDanaKeluar
+                                            ->where('pembayaran_id', 2)
+                                            ->sum('jumlah');
 
-                                        $pengeluaranJasaCash = $pengeluaranGajiCapster + $jurnalKeluarCash + $danaKeluarCash + $tarikLabaCashPeriode;
-                                        $pengeluaranJasaTransfer = $jurnalKeluarTransfer + $danaKeluarTransfer + $tarikLabaTransferPeriode;
+                                        $pengeluaranJasaCash =
+                                            $pengeluaranGajiCapster +
+                                            $jurnalKeluarCash +
+                                            $danaKeluarCash +
+                                            $tarikLabaCashPeriode;
+                                        $pengeluaranJasaTransfer =
+                                            $jurnalKeluarTransfer + $danaKeluarTransfer + $tarikLabaTransferPeriode;
                                         $pengeluaranJasa = $pengeluaranJasaCash + $pengeluaranJasaTransfer;
 
                                         // 3. Pengeluaran Prodak
@@ -93,57 +126,130 @@
 
                                         // Breakdown Cash & Transfer Harian
                                         $jasaHarianCash = ($pemasukanDetail->jasa_cash ?? 0) - $pengeluaranJasaCash;
-                                        $jasaHarianTransfer = ($pemasukanDetail->jasa_transfer ?? 0) - $pengeluaranJasaTransfer;
+                                        $jasaHarianTransfer =
+                                            ($pemasukanDetail->jasa_transfer ?? 0) - $pengeluaranJasaTransfer;
 
                                         $prodakHarianCash = ($pemasukanDetail->produk_cash ?? 0) - $pengeluaranProdak;
-                                        $prodakHarianTransfer = ($pemasukanDetail->produk_transfer ?? 0);
+                                        $prodakHarianTransfer = $pemasukanDetail->produk_transfer ?? 0;
 
-                                        $pendapatanHarianCash = (float)($pemasukanDetail->pendapatan_cash ?? 0);
+                                        $pendapatanHarianCash = (float) ($pemasukanDetail->pendapatan_cash ?? 0);
                                         $pendapatanHarianTransfer = 0;
 
-                                        $totalCurrHarianCash = $jasaHarianCash + $prodakHarianCash + $pendapatanHarianCash;
-                                        $totalCurrHarianTransfer = $jasaHarianTransfer + $prodakHarianTransfer + $pendapatanHarianTransfer;
+                                        $totalCurrHarianCash =
+                                            $jasaHarianCash + $prodakHarianCash + $pendapatanHarianCash;
+                                        $totalCurrHarianTransfer =
+                                            $jasaHarianTransfer + $prodakHarianTransfer + $pendapatanHarianTransfer;
 
                                         // Items rincian transaksi untuk modal popup
                                         $jasaItems = [];
                                         if (($pemasukanDetail->jasa_cash ?? 0) > 0) {
-                                            $jasaItems[] = ['tgl' => 'Periode', 'ket' => 'Pendapatan Jasa Layanan (Cash)', 'pembayaran' => 'Cash', 'jenis' => 'Masuk', 'jumlah' => (float)$pemasukanDetail->jasa_cash];
+                                            $jasaItems[] = [
+                                                'tgl' => 'Periode',
+                                                'ket' => 'Pendapatan Jasa Layanan (Cash)',
+                                                'pembayaran' => 'Cash',
+                                                'jenis' => 'Masuk',
+                                                'jumlah' => (float) $pemasukanDetail->jasa_cash,
+                                            ];
                                         }
                                         if (($pemasukanDetail->jasa_transfer ?? 0) > 0) {
-                                            $jasaItems[] = ['tgl' => 'Periode', 'ket' => 'Pendapatan Jasa Layanan (Transfer)', 'pembayaran' => 'Transfer', 'jenis' => 'Masuk', 'jumlah' => (float)$pemasukanDetail->jasa_transfer];
+                                            $jasaItems[] = [
+                                                'tgl' => 'Periode',
+                                                'ket' => 'Pendapatan Jasa Layanan (Transfer)',
+                                                'pembayaran' => 'Transfer',
+                                                'jenis' => 'Masuk',
+                                                'jumlah' => (float) $pemasukanDetail->jasa_transfer,
+                                            ];
                                         }
                                         foreach ($detailPengeluaranCapster as $dpc) {
                                             if ($dpc['total'] > 0) {
-                                                $jasaItems[] = ['tgl' => 'Periode', 'ket' => 'Pengeluaran Gaji: ' . $dpc['nama'], 'pembayaran' => 'Cash', 'jenis' => 'Keluar', 'jumlah' => (float)$dpc['total']];
+                                                $jasaItems[] = [
+                                                    'tgl' => 'Periode',
+                                                    'ket' => 'Pengeluaran Gaji: ' . $dpc['nama'],
+                                                    'pembayaran' => 'Cash',
+                                                    'jenis' => 'Keluar',
+                                                    'jumlah' => (float) $dpc['total'],
+                                                ];
                                             }
                                         }
                                         foreach ($detail_jurnal_keluar as $jk) {
-                                            $jasaItems[] = ['tgl' => date('d-m-Y', strtotime($jk->tgl)), 'ket' => 'Operasional: ' . ($jk->akun->nm_akun ?? $jk->ket ?? 'Jurnal Keluar'), 'pembayaran' => $jk->pembayaran_id == 2 ? 'Transfer' : 'Cash', 'jenis' => 'Keluar', 'jumlah' => (float)$jk->jumlah];
+                                            $jasaItems[] = [
+                                                'tgl' => date('d-m-Y', strtotime($jk->tgl)),
+                                                'ket' =>
+                                                    'Operasional: ' .
+                                                    ($jk->akun->nm_akun ?? ($jk->ket ?? 'Jurnal Keluar')),
+                                                'pembayaran' => $jk->pembayaran_id == 2 ? 'Transfer' : 'Cash',
+                                                'jenis' => 'Keluar',
+                                                'jumlah' => (float) $jk->jumlah,
+                                            ];
                                         }
                                         foreach ($detailDanaKeluar as $dk) {
-                                            $jasaItems[] = ['tgl' => date('d-m-Y', strtotime($dk->tgl)), 'ket' => 'Divisi Keluar: ' . ($dk->jenis ?? 'Dana Keluar'), 'pembayaran' => $dk->pembayaran_id == 2 ? 'Transfer' : 'Cash', 'jenis' => 'Keluar', 'jumlah' => (float)$dk->jumlah];
+                                            $jasaItems[] = [
+                                                'tgl' => date('d-m-Y', strtotime($dk->tgl)),
+                                                'ket' => 'Divisi Keluar: ' . ($dk->jenis ?? 'Dana Keluar'),
+                                                'pembayaran' => $dk->pembayaran_id == 2 ? 'Transfer' : 'Cash',
+                                                'jenis' => 'Keluar',
+                                                'jumlah' => (float) $dk->jumlah,
+                                            ];
                                         }
                                         foreach ($detailPenarikanLaba as $pl) {
-                                            $jasaItems[] = ['tgl' => date('d-m-Y', strtotime($pl->tgl)), 'ket' => 'Tarik Laba: ' . ($pl->investor->nm_investor ?? 'Investor'), 'pembayaran' => $pl->pembayaran_id == 2 ? 'Transfer' : 'Cash', 'jenis' => 'Keluar', 'jumlah' => (float)$pl->jumlah];
+                                            $jasaItems[] = [
+                                                'tgl' => date('d-m-Y', strtotime($pl->tgl)),
+                                                'ket' => 'Tarik Laba: ' . ($pl->investor->nm_investor ?? 'Investor'),
+                                                'pembayaran' => $pl->pembayaran_id == 2 ? 'Transfer' : 'Cash',
+                                                'jenis' => 'Keluar',
+                                                'jumlah' => (float) $pl->jumlah,
+                                            ];
                                         }
 
                                         $prodakItems = [];
                                         if (($pemasukanDetail->produk_cash ?? 0) > 0) {
-                                            $prodakItems[] = ['tgl' => 'Periode', 'ket' => 'Penjualan Produk (Cash)', 'pembayaran' => 'Cash', 'jenis' => 'Masuk', 'jumlah' => (float)$pemasukanDetail->produk_cash];
+                                            $prodakItems[] = [
+                                                'tgl' => 'Periode',
+                                                'ket' => 'Penjualan Produk (Cash)',
+                                                'pembayaran' => 'Cash',
+                                                'jenis' => 'Masuk',
+                                                'jumlah' => (float) $pemasukanDetail->produk_cash,
+                                            ];
                                         }
                                         if (($pemasukanDetail->produk_transfer ?? 0) > 0) {
-                                            $prodakItems[] = ['tgl' => 'Periode', 'ket' => 'Penjualan Produk (Transfer)', 'pembayaran' => 'Transfer', 'jenis' => 'Masuk', 'jumlah' => (float)$pemasukanDetail->produk_transfer];
+                                            $prodakItems[] = [
+                                                'tgl' => 'Periode',
+                                                'ket' => 'Penjualan Produk (Transfer)',
+                                                'pembayaran' => 'Transfer',
+                                                'jenis' => 'Masuk',
+                                                'jumlah' => (float) $pemasukanDetail->produk_transfer,
+                                            ];
                                         }
                                         foreach ($detailProduk as $dp) {
-                                            $prodakItems[] = ['tgl' => date('d-m-Y', strtotime($dp->tgl)), 'ket' => 'Pembelian Produk: ' . ($dp->service->nm_service ?? 'Produk'), 'pembayaran' => 'Cash', 'jenis' => 'Keluar', 'jumlah' => (float)$dp->jumlah];
+                                            $prodakItems[] = [
+                                                'tgl' => date('d-m-Y', strtotime($dp->tgl)),
+                                                'ket' => 'Pembelian Produk: ' . ($dp->service->nm_service ?? 'Produk'),
+                                                'pembayaran' => 'Cash',
+                                                'jenis' => 'Keluar',
+                                                'jumlah' => (float) $dp->jumlah,
+                                            ];
                                         }
                                         if ($komisiProduk > 0) {
-                                            $prodakItems[] = ['tgl' => 'Periode', 'ket' => 'Komisi Produk Capster', 'pembayaran' => 'Cash', 'jenis' => 'Keluar', 'jumlah' => (float)$komisiProduk];
+                                            $prodakItems[] = [
+                                                'tgl' => 'Periode',
+                                                'ket' => 'Komisi Produk Capster',
+                                                'pembayaran' => 'Cash',
+                                                'jenis' => 'Keluar',
+                                                'jumlah' => (float) $komisiProduk,
+                                            ];
                                         }
 
                                         $pendapatanItems = [];
                                         foreach ($detailPendapatan as $dp) {
-                                            $pendapatanItems[] = ['tgl' => date('d-m-Y', strtotime($dp->tgl)), 'ket' => 'Pendapatan: ' . ($dp->keterangan ?? $dp->nama ?? 'Pendapatan Lain'), 'pembayaran' => 'Cash', 'jenis' => 'Masuk', 'jumlah' => (float)$dp->jumlah];
+                                            $pendapatanItems[] = [
+                                                'tgl' => date('d-m-Y', strtotime($dp->tgl)),
+                                                'ket' =>
+                                                    'Pendapatan: ' .
+                                                    ($dp->keterangan ?? ($dp->nama ?? 'Pendapatan Lain')),
+                                                'pembayaran' => 'Cash',
+                                                'jenis' => 'Masuk',
+                                                'jumlah' => (float) $dp->jumlah,
+                                            ];
                                         }
 
                                         $totalPemasukanItems = array_merge($jasaItems, $prodakItems, $pendapatanItems);
@@ -161,17 +267,14 @@
                                             {{ $pemasukanSaldoBerjalan->jasa_keluar > 0 ? number_format($pemasukanSaldoBerjalan->jasa_keluar, 0, ',', '.') : '-' }}
                                         </td>
                                         <td class="text-center">
-                                            <span class="btn-show-detail text-decoration-underline text-primary" style="cursor: pointer;"
-                                                data-title="Detail Saldo Berjalan - Jasa Layanan"
-                                                data-name="Jasa Layanan (Saldo Berjalan)"
-                                                data-mode="saldo"
+                                            <span class="btn-show-detail text-decoration-underline text-primary"
+                                                style="cursor: pointer;" data-title="Detail Saldo Berjalan - Jasa Layanan"
+                                                data-name="Jasa Layanan (Saldo Berjalan)" data-mode="saldo"
                                                 data-past-cash="{{ $pemasukanSaldoBerjalan->jasa_past_cash }}"
                                                 data-past-transfer="{{ $pemasukanSaldoBerjalan->jasa_past_transfer }}"
                                                 data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->jasa_curr_saldo_cash }}"
                                                 data-curr-saldo-transfer="{{ $pemasukanSaldoBerjalan->jasa_curr_saldo_transfer }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
-                                                data-items='[]'>
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0" data-items='[]'>
                                                 {{ number_format($pemasukanSaldoBerjalan->jasa_aktual, 0, ',', '.') }}
                                             </span>
                                         </td>
@@ -185,10 +288,9 @@
                                             {{ number_format($jasaLayanan - $pengeluaranJasa, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-semibold">
-                                            <span class="btn-show-detail text-decoration-underline text-primary" style="cursor: pointer;"
-                                                data-title="Detail Total Aktual - Jasa Layanan"
-                                                data-name="Jasa Layanan"
-                                                data-mode="total"
+                                            <span class="btn-show-detail text-decoration-underline text-primary"
+                                                style="cursor: pointer;" data-title="Detail Total Aktual - Jasa Layanan"
+                                                data-name="Jasa Layanan" data-mode="total"
                                                 data-past-cash="{{ $pemasukanSaldoBerjalan->jasa_past_cash }}"
                                                 data-past-transfer="{{ $pemasukanSaldoBerjalan->jasa_past_transfer }}"
                                                 data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->jasa_curr_saldo_cash }}"
@@ -216,17 +318,15 @@
                                             {{ $pemasukanSaldoBerjalan->prodak_keluar > 0 ? number_format($pemasukanSaldoBerjalan->prodak_keluar, 0, ',', '.') : '-' }}
                                         </td>
                                         <td class="text-center">
-                                            <span class="btn-show-detail text-decoration-underline text-primary" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-decoration-underline text-primary"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Saldo Berjalan - Penjualan Prodak"
-                                                data-name="Penjualan Prodak (Saldo Berjalan)"
-                                                data-mode="saldo"
+                                                data-name="Penjualan Prodak (Saldo Berjalan)" data-mode="saldo"
                                                 data-past-cash="{{ $pemasukanSaldoBerjalan->prodak_past_cash }}"
                                                 data-past-transfer="{{ $pemasukanSaldoBerjalan->prodak_past_transfer }}"
                                                 data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->prodak_curr_saldo_cash }}"
                                                 data-curr-saldo-transfer="{{ $pemasukanSaldoBerjalan->prodak_curr_saldo_transfer }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
-                                                data-items='[]'>
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0" data-items='[]'>
                                                 {{ number_format($pemasukanSaldoBerjalan->prodak_aktual, 0, ',', '.') }}
                                             </span>
                                         </td>
@@ -238,10 +338,10 @@
                                             {{ number_format($penjualanProdak - $pengeluaranProdak, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-semibold">
-                                            <span class="btn-show-detail text-decoration-underline text-primary" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-decoration-underline text-primary"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Total Aktual - Penjualan Prodak"
-                                                data-name="Penjualan Prodak"
-                                                data-mode="total"
+                                                data-name="Penjualan Prodak" data-mode="total"
                                                 data-past-cash="{{ $pemasukanSaldoBerjalan->prodak_past_cash }}"
                                                 data-past-transfer="{{ $pemasukanSaldoBerjalan->prodak_past_transfer }}"
                                                 data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->prodak_curr_saldo_cash }}"
@@ -270,16 +370,15 @@
                                             {{ $pemasukanSaldoBerjalan->pendapatan_keluar > 0 ? number_format($pemasukanSaldoBerjalan->pendapatan_keluar, 0, ',', '.') : '-' }}
                                         </td>
                                         <td class="text-center">
-                                            <span class="btn-show-detail text-decoration-underline text-primary" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-decoration-underline text-primary"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Saldo Berjalan - Pendapatan DLL"
-                                                data-name="Pendapatan DLL (Saldo Berjalan)"
-                                                data-mode="saldo"
+                                                data-name="Pendapatan DLL (Saldo Berjalan)" data-mode="saldo"
                                                 data-past-cash="{{ $pemasukanSaldoBerjalan->pendapatan_past_cash }}"
                                                 data-past-transfer="{{ $pemasukanSaldoBerjalan->pendapatan_past_transfer }}"
                                                 data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->pendapatan_curr_saldo_cash }}"
                                                 data-curr-saldo-transfer="{{ $pemasukanSaldoBerjalan->pendapatan_curr_saldo_transfer }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                 data-items="{{ json_encode($pemasukanSaldoBerjalan->pendapatan_items ?? []) }}">
                                                 {{ number_format($pemasukanSaldoBerjalan->pendapatan_aktual, 0, ',', '.') }}
                                             </span>
@@ -289,10 +388,9 @@
                                         <td class="text-end">
                                             {{ number_format($pendapatanDll, 0, ',', '.') }}</td>
                                         <td class="text-end fw-semibold">
-                                            <span class="btn-show-detail text-decoration-underline text-primary" style="cursor: pointer;"
-                                                data-title="Detail Total Aktual - Pendapatan DLL"
-                                                data-name="Pendapatan DLL"
-                                                data-mode="total"
+                                            <span class="btn-show-detail text-decoration-underline text-primary"
+                                                style="cursor: pointer;" data-title="Detail Total Aktual - Pendapatan DLL"
+                                                data-name="Pendapatan DLL" data-mode="total"
                                                 data-past-cash="{{ $pemasukanSaldoBerjalan->pendapatan_past_cash }}"
                                                 data-past-transfer="{{ $pemasukanSaldoBerjalan->pendapatan_past_transfer }}"
                                                 data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->pendapatan_curr_saldo_cash }}"
@@ -315,17 +413,15 @@
                                             {{ $pemasukanSaldoBerjalan->total_keluar > 0 ? number_format($pemasukanSaldoBerjalan->total_keluar, 0, ',', '.') : '-' }}
                                         </td>
                                         <td class="text-center">
-                                            <span class="btn-show-detail text-decoration-underline text-primary" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-decoration-underline text-primary"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Aktual Saldo Berjalan - TOTAL SALDO"
-                                                data-name="TOTAL SALDO (Aktual Saldo Berjalan)"
-                                                data-mode="saldo"
-                                                data-past-cash="{{ $pemasukanSaldoBerjalan->total_past_cash }}"
-                                                data-past-transfer="{{ $pemasukanSaldoBerjalan->total_past_transfer }}"
-                                                data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->total_curr_saldo_cash }}"
-                                                data-curr-saldo-transfer="{{ $pemasukanSaldoBerjalan->total_curr_saldo_transfer }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
-                                                data-items='[]'>
+                                                data-name="TOTAL SALDO (Aktual Saldo Berjalan)" data-mode="saldo"
+                                                data-past-cash="{{ $pemasukanSaldoBerjalan->total_past_cash + $dataMutasiKas->past_net_cash }}"
+                                                data-past-transfer="{{ $pemasukanSaldoBerjalan->total_past_transfer + $dataMutasiKas->past_net_transfer }}"
+                                                data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->total_curr_saldo_cash + $dataMutasiKas->curr_net_cash }}"
+                                                data-curr-saldo-transfer="{{ $pemasukanSaldoBerjalan->total_curr_saldo_transfer + $dataMutasiKas->curr_net_transfer }}"
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0" data-items='[]'>
                                                 {{ number_format($pemasukanSaldoBerjalan->total_aktual, 0, ',', '.') }}
                                             </span>
                                         </td>
@@ -337,14 +433,13 @@
                                             {{ number_format($totalPemasukan - $totalPengeluaranHarian, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end">
-                                            <span class="btn-show-detail text-decoration-underline text-primary" style="cursor: pointer;"
-                                                data-title="Detail Total Aktual - TOTAL SALDO"
-                                                data-name="TOTAL SALDO"
-                                                data-mode="total"
-                                                data-past-cash="{{ $pemasukanSaldoBerjalan->total_past_cash }}"
-                                                data-past-transfer="{{ $pemasukanSaldoBerjalan->total_past_transfer }}"
-                                                data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->total_curr_saldo_cash }}"
-                                                data-curr-saldo-transfer="{{ $pemasukanSaldoBerjalan->total_curr_saldo_transfer }}"
+                                            <span class="btn-show-detail text-decoration-underline text-primary"
+                                                style="cursor: pointer;" data-title="Detail Total Aktual - TOTAL SALDO"
+                                                data-name="TOTAL SALDO" data-mode="total"
+                                                data-past-cash="{{ $pemasukanSaldoBerjalan->total_past_cash + $dataMutasiKas->past_net_cash }}"
+                                                data-past-transfer="{{ $pemasukanSaldoBerjalan->total_past_transfer + $dataMutasiKas->past_net_transfer }}"
+                                                data-curr-saldo-cash="{{ $pemasukanSaldoBerjalan->total_curr_saldo_cash + $dataMutasiKas->curr_net_cash }}"
+                                                data-curr-saldo-transfer="{{ $pemasukanSaldoBerjalan->total_curr_saldo_transfer + $dataMutasiKas->curr_net_transfer }}"
                                                 data-curr-harian-cash="{{ $totalCurrHarianCash }}"
                                                 data-curr-harian-transfer="{{ $totalCurrHarianTransfer }}"
                                                 data-items="{{ json_encode($totalPemasukanItems) }}">
@@ -393,16 +488,15 @@
                                             {{ number_format($saldoBerjalanGajiPengeluaran, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Aktual Saldo Berjalan - Gaji/Komisi Capster"
-                                                data-name="Gaji/Komisi Capster"
-                                                data-mode="saldo"
+                                                data-name="Gaji/Komisi Capster" data-mode="saldo"
                                                 data-past-cash="{{ $pokokDetail->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $pokokDetail->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $pokokDetail->curr_saldo_cash ?? 0 }}"
                                                 data-curr-saldo-transfer="{{ $pokokDetail->curr_saldo_transfer ?? 0 }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                 data-items="{{ json_encode($pokokDetail->items ?? []) }}">
                                                 {{ number_format($saldoBerjalanPokok, 0, ',', '.') }}
                                             </span>
@@ -424,10 +518,10 @@
                                         <td class="text-end text-primary fw-bold">
                                             {{ number_format($aktualGajiCapster, 0, ',', '.') }}</td>
                                         <td class="text-end text-success fw-bold">
-                                            <span class="btn-show-detail text-success text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-success text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Total Aktual - Gaji/Komisi Capster"
-                                                data-name="Gaji/Komisi Capster"
-                                                data-mode="total"
+                                                data-name="Gaji/Komisi Capster" data-mode="total"
                                                 data-past-cash="{{ $pokokDetail->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $pokokDetail->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $pokokDetail->curr_saldo_cash ?? 0 }}"
@@ -450,16 +544,15 @@
                                             {{ number_format($saldoBerjalanGajiPengeluaran, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-bold">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Aktual Saldo Berjalan - TOTAL POKOK"
-                                                data-name="TOTAL POKOK"
-                                                data-mode="saldo"
+                                                data-name="TOTAL POKOK" data-mode="saldo"
                                                 data-past-cash="{{ $pokokDetail->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $pokokDetail->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $pokokDetail->curr_saldo_cash ?? 0 }}"
                                                 data-curr-saldo-transfer="{{ $pokokDetail->curr_saldo_transfer ?? 0 }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                 data-items="{{ json_encode($pokokDetail->items ?? []) }}">
                                                 {{ number_format($saldoBerjalanPokok, 0, ',', '.') }}
                                             </span>
@@ -470,10 +563,9 @@
                                         </td>
                                         <td class="text-end fw-bold">{{ number_format($totalPokok, 0, ',', '.') }}</td>
                                         <td class="text-end fw-bold">
-                                            <span class="btn-show-detail text-dark text-decoration-underline" style="cursor: pointer;"
-                                                data-title="Detail Total Aktual - TOTAL POKOK"
-                                                data-name="TOTAL POKOK"
-                                                data-mode="total"
+                                            <span class="btn-show-detail text-dark text-decoration-underline"
+                                                style="cursor: pointer;" data-title="Detail Total Aktual - TOTAL POKOK"
+                                                data-name="TOTAL POKOK" data-mode="total"
                                                 data-past-cash="{{ $pokokDetail->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $pokokDetail->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $pokokDetail->curr_saldo_cash ?? 0 }}"
@@ -520,16 +612,15 @@
                                             <td class="text-end">
                                                 {{ number_format($item->saldo_berjalan_pengeluaran, 0, ',', '.') }}</td>
                                             <td class="text-end">
-                                                <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                                <span class="btn-show-detail text-primary text-decoration-underline"
+                                                    style="cursor: pointer;"
                                                     data-title="Detail Aktual Saldo Berjalan - {{ $item->akun->nm_akun ?? 'Operasional' }}"
                                                     data-name="{{ $item->akun->nm_akun ?? 'Operasional' }}"
-                                                    data-mode="saldo"
-                                                    data-past-cash="{{ $item->past_cash ?? 0 }}"
+                                                    data-mode="saldo" data-past-cash="{{ $item->past_cash ?? 0 }}"
                                                     data-past-transfer="{{ $item->past_transfer ?? 0 }}"
                                                     data-curr-saldo-cash="{{ $item->curr_saldo_cash ?? 0 }}"
                                                     data-curr-saldo-transfer="{{ $item->curr_saldo_transfer ?? 0 }}"
-                                                    data-curr-harian-cash="0"
-                                                    data-curr-harian-transfer="0"
+                                                    data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                     data-items="{{ json_encode($item->items ?? []) }}">
                                                     {{ number_format($item->saldo_berjalan_aktual, 0, ',', '.') }}
                                                 </span>
@@ -542,11 +633,11 @@
                                                 {{ number_format($item->aktual_harian, 0, ',', '.') }}
                                             </td>
                                             <td class="text-end fw-semibold">
-                                                <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                                <span class="btn-show-detail text-primary text-decoration-underline"
+                                                    style="cursor: pointer;"
                                                     data-title="Detail Total Aktual - {{ $item->akun->nm_akun ?? 'Operasional' }}"
                                                     data-name="{{ $item->akun->nm_akun ?? 'Operasional' }}"
-                                                    data-mode="total"
-                                                    data-past-cash="{{ $item->past_cash ?? 0 }}"
+                                                    data-mode="total" data-past-cash="{{ $item->past_cash ?? 0 }}"
                                                     data-past-transfer="{{ $item->past_transfer ?? 0 }}"
                                                     data-curr-saldo-cash="{{ $item->curr_saldo_cash ?? 0 }}"
                                                     data-curr-saldo-transfer="{{ $item->curr_saldo_transfer ?? 0 }}"
@@ -569,16 +660,15 @@
                                             {{ number_format($operasional->sum('saldo_berjalan_pengeluaran'), 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-bold">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Aktual Saldo Berjalan - TOTAL OPERASIONAL"
-                                                data-name="TOTAL OPERASIONAL"
-                                                data-mode="saldo"
+                                                data-name="TOTAL OPERASIONAL" data-mode="saldo"
                                                 data-past-cash="{{ $operasional->sum('past_cash') }}"
                                                 data-past-transfer="{{ $operasional->sum('past_transfer') }}"
                                                 data-curr-saldo-cash="{{ $operasional->sum('curr_saldo_cash') }}"
                                                 data-curr-saldo-transfer="{{ $operasional->sum('curr_saldo_transfer') }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                 data-items="{{ json_encode($operasional->pluck('items')->collapse()->values()) }}">
                                                 {{ number_format($operasional->sum('saldo_berjalan_aktual'), 0, ',', '.') }}
                                             </span>
@@ -591,10 +681,10 @@
                                             {{ number_format($totalOperasional - $operasional->sum('total_keluar'), 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-bold">
-                                            <span class="btn-show-detail text-dark text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-dark text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Total Aktual - TOTAL OPERASIONAL"
-                                                data-name="TOTAL OPERASIONAL"
-                                                data-mode="total"
+                                                data-name="TOTAL OPERASIONAL" data-mode="total"
                                                 data-past-cash="{{ $operasional->sum('past_cash') }}"
                                                 data-past-transfer="{{ $operasional->sum('past_transfer') }}"
                                                 data-curr-saldo-cash="{{ $operasional->sum('curr_saldo_cash') }}"
@@ -635,29 +725,28 @@
                                         <td class="text-end">{{ number_format($tabunganSaldoMasuk, 0, ',', '.') }}</td>
                                         <td class="text-end">{{ number_format($tabunganSaldoKeluar, 0, ',', '.') }}</td>
                                         <td class="text-end">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Aktual Saldo Berjalan - DIV Tabungan"
-                                                data-name="DIV Tabungan"
-                                                data-mode="saldo"
+                                                data-name="DIV Tabungan" data-mode="saldo"
                                                 data-past-cash="{{ $divSummary['TABUNGAN']->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $divSummary['TABUNGAN']->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $divSummary['TABUNGAN']->curr_saldo_cash ?? 0 }}"
                                                 data-curr-saldo-transfer="{{ $divSummary['TABUNGAN']->curr_saldo_transfer ?? 0 }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                 data-items="{{ json_encode($divSummary['TABUNGAN']->items ?? []) }}">
                                                 {{ number_format($tabunganSaldoMasuk - $tabunganSaldoKeluar, 0, ',', '.') }}
                                             </span>
                                         </td>
                                         <td class="text-end">{{ number_format($tabungan, 0, ',', '.') }}</td>
                                         <td class="text-end">{{ number_format($tabunganKeluar, 0, ',', '.') }}</td>
-                                        <td class="text-end">{{ number_format($tabungan - $tabunganKeluar, 0, ',', '.') }}
+                                        <td class="text-end">
+                                            {{ number_format($tabungan - $tabunganKeluar, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-semibold">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
-                                                data-title="Detail Total Aktual - DIV Tabungan"
-                                                data-name="DIV Tabungan"
-                                                data-mode="total"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;" data-title="Detail Total Aktual - DIV Tabungan"
+                                                data-name="DIV Tabungan" data-mode="total"
                                                 data-past-cash="{{ $divSummary['TABUNGAN']->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $divSummary['TABUNGAN']->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $divSummary['TABUNGAN']->curr_saldo_cash ?? 0 }}"
@@ -676,29 +765,28 @@
                                         <td class="text-end">{{ number_format($cadanganSaldoMasuk, 0, ',', '.') }}</td>
                                         <td class="text-end">{{ number_format($cadanganSaldoKeluar, 0, ',', '.') }}</td>
                                         <td class="text-end">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Aktual Saldo Berjalan - DIV Cadangan"
-                                                data-name="DIV Cadangan"
-                                                data-mode="saldo"
+                                                data-name="DIV Cadangan" data-mode="saldo"
                                                 data-past-cash="{{ $divSummary['CADANGAN']->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $divSummary['CADANGAN']->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $divSummary['CADANGAN']->curr_saldo_cash ?? 0 }}"
                                                 data-curr-saldo-transfer="{{ $divSummary['CADANGAN']->curr_saldo_transfer ?? 0 }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                 data-items="{{ json_encode($divSummary['CADANGAN']->items ?? []) }}">
                                                 {{ number_format($cadanganSaldoMasuk - $cadanganSaldoKeluar, 0, ',', '.') }}
                                             </span>
                                         </td>
                                         <td class="text-end">{{ number_format($cadangan, 0, ',', '.') }}</td>
                                         <td class="text-end">{{ number_format($cadanganKeluar, 0, ',', '.') }}</td>
-                                        <td class="text-end">{{ number_format($cadangan - $cadanganKeluar, 0, ',', '.') }}
+                                        <td class="text-end">
+                                            {{ number_format($cadangan - $cadanganKeluar, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-semibold">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
-                                                data-title="Detail Total Aktual - DIV Cadangan"
-                                                data-name="DIV Cadangan"
-                                                data-mode="total"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;" data-title="Detail Total Aktual - DIV Cadangan"
+                                                data-name="DIV Cadangan" data-mode="total"
                                                 data-past-cash="{{ $divSummary['CADANGAN']->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $divSummary['CADANGAN']->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $divSummary['CADANGAN']->curr_saldo_cash ?? 0 }}"
@@ -717,16 +805,15 @@
                                         <td class="text-end">{{ number_format($danaSeftySaldoMasuk, 0, ',', '.') }}</td>
                                         <td class="text-end">{{ number_format($danaSeftySaldoKeluar, 0, ',', '.') }}</td>
                                         <td class="text-end">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Aktual Saldo Berjalan - DIV Dana Sefty"
-                                                data-name="DIV Dana Sefty"
-                                                data-mode="saldo"
+                                                data-name="DIV Dana Sefty" data-mode="saldo"
                                                 data-past-cash="{{ $divSummary['DANA SEFTY']->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $divSummary['DANA SEFTY']->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $divSummary['DANA SEFTY']->curr_saldo_cash ?? 0 }}"
                                                 data-curr-saldo-transfer="{{ $divSummary['DANA SEFTY']->curr_saldo_transfer ?? 0 }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                 data-items="{{ json_encode($divSummary['DANA SEFTY']->items ?? []) }}">
                                                 {{ number_format($danaSeftySaldoMasuk - $danaSeftySaldoKeluar, 0, ',', '.') }}
                                             </span>
@@ -737,10 +824,9 @@
                                             {{ number_format($danaSefty - $danaSeftyKeluar, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-semibold">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
-                                                data-title="Detail Total Aktual - DIV Dana Sefty"
-                                                data-name="DIV Dana Sefty"
-                                                data-mode="total"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;" data-title="Detail Total Aktual - DIV Dana Sefty"
+                                                data-name="DIV Dana Sefty" data-mode="total"
                                                 data-past-cash="{{ $divSummary['DANA SEFTY']->past_cash ?? 0 }}"
                                                 data-past-transfer="{{ $divSummary['DANA SEFTY']->past_transfer ?? 0 }}"
                                                 data-curr-saldo-cash="{{ $divSummary['DANA SEFTY']->curr_saldo_cash ?? 0 }}"
@@ -756,22 +842,22 @@
                                     <!-- TOTAL DIV -->
                                     <tr class="table-light">
                                         <td class="fw-bold text-end">TOTAL DIV</td>
-                                        <td class="text-end fw-bold">{{ number_format($totalDivSaldoMasuk, 0, ',', '.') }}
+                                        <td class="text-end fw-bold">
+                                            {{ number_format($totalDivSaldoMasuk, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-bold">
                                             {{ number_format($totalDivSaldoKeluar, 0, ',', '.') }}
                                         </td>
                                         <td class="text-end fw-bold">
-                                            <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-primary text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Aktual Saldo Berjalan - TOTAL DIV"
-                                                data-name="TOTAL DIV"
-                                                data-mode="saldo"
+                                                data-name="TOTAL DIV" data-mode="saldo"
                                                 data-past-cash="{{ ($divSummary['TABUNGAN']->past_cash ?? 0) + ($divSummary['CADANGAN']->past_cash ?? 0) + ($divSummary['DANA SEFTY']->past_cash ?? 0) }}"
                                                 data-past-transfer="{{ ($divSummary['TABUNGAN']->past_transfer ?? 0) + ($divSummary['CADANGAN']->past_transfer ?? 0) + ($divSummary['DANA SEFTY']->past_transfer ?? 0) }}"
                                                 data-curr-saldo-cash="{{ ($divSummary['TABUNGAN']->curr_saldo_cash ?? 0) + ($divSummary['CADANGAN']->curr_saldo_cash ?? 0) + ($divSummary['DANA SEFTY']->curr_saldo_cash ?? 0) }}"
                                                 data-curr-saldo-transfer="{{ ($divSummary['TABUNGAN']->curr_saldo_transfer ?? 0) + ($divSummary['CADANGAN']->curr_saldo_transfer ?? 0) + ($divSummary['DANA SEFTY']->curr_saldo_transfer ?? 0) }}"
-                                                data-curr-harian-cash="0"
-                                                data-curr-harian-transfer="0"
+                                                data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                 data-items="{{ json_encode(array_merge($divSummary['TABUNGAN']->items ?? [], $divSummary['CADANGAN']->items ?? [], $divSummary['DANA SEFTY']->items ?? [])) }}">
                                                 {{ number_format($totalDivSaldoMasuk - $totalDivSaldoKeluar, 0, ',', '.') }}
                                             </span>
@@ -782,10 +868,9 @@
                                         <td class="text-end fw-bold">
                                             {{ number_format($totalDiv - $totalDivKeluar, 0, ',', '.') }}</td>
                                         <td class="text-end fw-bold">
-                                            <span class="btn-show-detail text-dark text-decoration-underline" style="cursor: pointer;"
-                                                data-title="Detail Total Aktual - TOTAL DIV"
-                                                data-name="TOTAL DIV"
-                                                data-mode="total"
+                                            <span class="btn-show-detail text-dark text-decoration-underline"
+                                                style="cursor: pointer;" data-title="Detail Total Aktual - TOTAL DIV"
+                                                data-name="TOTAL DIV" data-mode="total"
                                                 data-past-cash="{{ ($divSummary['TABUNGAN']->past_cash ?? 0) + ($divSummary['CADANGAN']->past_cash ?? 0) + ($divSummary['DANA SEFTY']->past_cash ?? 0) }}"
                                                 data-past-transfer="{{ ($divSummary['TABUNGAN']->past_transfer ?? 0) + ($divSummary['CADANGAN']->past_transfer ?? 0) + ($divSummary['DANA SEFTY']->past_transfer ?? 0) }}"
                                                 data-curr-saldo-cash="{{ ($divSummary['TABUNGAN']->curr_saldo_cash ?? 0) + ($divSummary['CADANGAN']->curr_saldo_cash ?? 0) + ($divSummary['DANA SEFTY']->curr_saldo_cash ?? 0) }}"
@@ -849,17 +934,13 @@
                                         <td class="text-center">-</td>
                                         <td class="text-end">{{ number_format($totalLaba, 0, ',', '.') }}</td>
                                         <td class="text-end">
-                                            <span class="btn-show-detail text-dark text-decoration-underline" style="cursor: pointer;"
+                                            <span class="btn-show-detail text-dark text-decoration-underline"
+                                                style="cursor: pointer;"
                                                 data-title="Detail Total Aktual - TOTAL LABA BERSIH"
-                                                data-name="TOTAL LABA BERSIH"
-                                                data-mode="total"
-                                                data-past-cash="0"
-                                                data-past-transfer="0"
-                                                data-curr-saldo-cash="0"
-                                                data-curr-saldo-transfer="0"
-                                                data-curr-harian-cash="{{ $totalLaba }}"
-                                                data-curr-harian-transfer="0"
-                                                data-items='[]'>
+                                                data-name="TOTAL LABA BERSIH" data-mode="total" data-past-cash="0"
+                                                data-past-transfer="0" data-curr-saldo-cash="0"
+                                                data-curr-saldo-transfer="0" data-curr-harian-cash="{{ $totalLaba }}"
+                                                data-curr-harian-transfer="0" data-items='[]'>
                                                 {{ number_format($totalLaba, 0, ',', '.') }}
                                             </span>
                                         </td>
@@ -899,18 +980,18 @@
                                                 {{ $investor->nm_investor }} ({{ $persen }}%)
                                             </td>
                                             <td class="text-end">{{ number_format($dtSaldoLaba, 0, ',', '.') }}</td>
-                                            <td class="text-end">{{ number_format($dtSaldoLabaKeluar, 0, ',', '.') }}</td>
+                                            <td class="text-end">{{ number_format($dtSaldoLabaKeluar, 0, ',', '.') }}
+                                            </td>
                                             <td class="text-end">
-                                                <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                                <span class="btn-show-detail text-primary text-decoration-underline"
+                                                    style="cursor: pointer;"
                                                     data-title="Detail Aktual Saldo Berjalan - {{ $investor->nm_investor }}"
                                                     data-name="{{ $investor->nm_investor }} (Saldo Berjalan)"
-                                                    data-mode="saldo"
-                                                    data-past-cash="{{ $sLaba->past_cash ?? 0 }}"
+                                                    data-mode="saldo" data-past-cash="{{ $sLaba->past_cash ?? 0 }}"
                                                     data-past-transfer="{{ $sLaba->past_transfer ?? 0 }}"
                                                     data-curr-saldo-cash="{{ $sLaba->curr_saldo_cash ?? 0 }}"
                                                     data-curr-saldo-transfer="{{ $sLaba->curr_saldo_transfer ?? 0 }}"
-                                                    data-curr-harian-cash="0"
-                                                    data-curr-harian-transfer="0"
+                                                    data-curr-harian-cash="0" data-curr-harian-transfer="0"
                                                     data-items="{{ json_encode($sLaba->items ?? []) }}">
                                                     {{ number_format($dtSaldoLaba - $dtSaldoLabaKeluar, 0, ',', '.') }}
                                                 </span>
@@ -920,10 +1001,10 @@
                                             <td class="text-end">
                                                 {{ number_format($bagianLaba - $dtpenarikanLaba, 0, ',', '.') }}</td>
                                             <td class="text-end fw-semibold">
-                                                <span class="btn-show-detail text-primary text-decoration-underline" style="cursor: pointer;"
+                                                <span class="btn-show-detail text-primary text-decoration-underline"
+                                                    style="cursor: pointer;"
                                                     data-title="Detail Total Aktual - {{ $investor->nm_investor }}"
-                                                    data-name="{{ $investor->nm_investor }}"
-                                                    data-mode="total"
+                                                    data-name="{{ $investor->nm_investor }}" data-mode="total"
                                                     data-past-cash="{{ $sLaba->past_cash ?? 0 }}"
                                                     data-past-transfer="{{ $sLaba->past_transfer ?? 0 }}"
                                                     data-curr-saldo-cash="{{ $sLaba->curr_saldo_cash ?? 0 }}"
@@ -961,6 +1042,16 @@
                         <input type="hidden" name="jenis_dana" value="1">
                         <input type="hidden" name="jenis_saldo" value="2">
                         <div class="row g-3">
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Cabang</label>
+                                <select name="cabang_id" class="form-select" required>
+                                    <option value="">Pilih Cabang</option>
+                                    @foreach ($cabang as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <label for="tanggal_dana" class="form-label">Tanggal</label>
                                 <input type="date" id="tanggal_dana" name="tanggal" class="form-control"
@@ -1012,6 +1103,7 @@
                                     <th>Jenis</th>
                                     <th>Pembayaran</th>
                                     <th>Jumlah</th>
+                                    <th>CABANG</th>
                                     <th>Keterangan</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -1026,6 +1118,8 @@
                                             {{ $item->pembayaran_id == 1 ? 'Cash' : 'Transfer' }}</td>
                                         <td class="text-end fw-semibold">Rp
                                             {{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
                                         <td>{{ $item->ket }}</td>
                                         <td class="text-center">
                                             <form action="{{ route('laporan-keuangan.destroy-dana', $item->id) }}"
@@ -1069,6 +1163,16 @@
                         <input type="hidden" name="jenis_dana" value="2">
                         <input type="hidden" name="jenis_saldo" value="2">
                         <div class="row g-3">
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Cabang</label>
+                                <select name="cabang_id" class="form-select" required>
+                                    <option value="">Pilih Cabang</option>
+                                    @foreach ($cabang as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <label for="tanggal_dana_keluar" class="form-label">Tanggal</label>
                                 <input type="date" id="tanggal_dana_keluar" name="tanggal" class="form-control"
@@ -1120,6 +1224,7 @@
                                     <th>Jenis</th>
                                     <th>Pembayaran</th>
                                     <th>Jumlah</th>
+                                    <th>CABANG</th>
                                     <th>Keterangan</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -1134,6 +1239,8 @@
                                             {{ $item->pembayaran_id == 1 ? 'Cash' : 'Transfer' }}</td>
                                         <td class="text-end fw-semibold">Rp
                                             {{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
                                         <td>{{ $item->ket }}</td>
                                         <td class="text-center">
                                             <form action="{{ route('laporan-keuangan.destroy-dana', $item->id) }}"
@@ -1177,6 +1284,16 @@
                         <input type="hidden" name="jenis_dana" value="1">
                         <input type="hidden" name="jenis_saldo" value="1">
                         <div class="row g-3">
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Cabang</label>
+                                <select name="cabang_id" class="form-select" required>
+                                    <option value="">Pilih Cabang</option>
+                                    @foreach ($cabang as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <label for="tanggal_dana_keluar" class="form-label">Tanggal</label>
                                 <input type="date" id="tanggal_dana_keluar" name="tanggal" class="form-control"
@@ -1228,6 +1345,7 @@
                                     <th>Jenis</th>
                                     <th>Pembayaran</th>
                                     <th>Jumlah</th>
+                                    <th>CABANG</th>
                                     <th>Keterangan</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -1242,6 +1360,8 @@
                                             {{ $item->pembayaran_id == 1 ? 'Cash' : 'Transfer' }}</td>
                                         <td class="text-end fw-semibold">Rp
                                             {{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
                                         <td>{{ $item->ket }}</td>
                                         <td class="text-center">
                                             <form action="{{ route('laporan-keuangan.destroy-dana', $item->id) }}"
@@ -1284,6 +1404,16 @@
                         <input type="hidden" name="jenis_dana" value="2">
                         <input type="hidden" name="jenis_saldo" value="1">
                         <div class="row g-3">
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Cabang</label>
+                                <select name="cabang_id" class="form-select" required>
+                                    <option value="">Pilih Cabang</option>
+                                    @foreach ($cabang as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <label for="tanggal_dana_keluar" class="form-label">Tanggal</label>
                                 <input type="date" id="tanggal_dana_keluar" name="tanggal" class="form-control"
@@ -1335,6 +1465,7 @@
                                     <th>Jenis</th>
                                     <th>Pembayaran</th>
                                     <th>Jumlah</th>
+                                    <th>CABANG</th>
                                     <th>Keterangan</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -1349,6 +1480,8 @@
                                             {{ $item->pembayaran_id == 1 ? 'Cash' : 'Transfer' }}</td>
                                         <td class="text-end fw-semibold">Rp
                                             {{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
                                         <td>{{ $item->ket }}</td>
                                         <td class="text-center">
                                             <form action="{{ route('laporan-keuangan.destroy-dana', $item->id) }}"
@@ -1391,6 +1524,16 @@
                         @csrf
                         <h6 class="fw-semibold mb-3">Tambah Data Pendapatan DLL</h6>
                         <div class="row g-3">
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Cabang</label>
+                                <select name="cabang_id" class="form-select" required>
+                                    <option value="">Pilih Cabang</option>
+                                    @foreach ($cabang as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <label for="tanggal" class="form-label">Tanggal</label>
                                 <input type="date" id="tanggal" name="tanggal" class="form-control"
@@ -1422,6 +1565,7 @@
                                 <tr>
                                     <th>Tanggal</th>
                                     <th>Jumlah</th>
+                                    <th>CABANG</th>
                                     <th>Keterangan</th>
                                     <th>User Input</th>
                                     <th>Aksi</th>
@@ -1434,6 +1578,8 @@
                                         </td>
                                         <td class="text-end fw-semibold">Rp
                                             {{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
                                         <td>{{ $item->ket }}</td>
                                         <td class="text-center">{{ $item->user->name ?? '-' }}</td>
                                         <td class="text-center">
@@ -1477,6 +1623,16 @@
                     <form action="{{ route('laporan-keuangan.store-produk') }}" method="POST">
                         @csrf
                         <div class="row g-3">
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Cabang</label>
+                                <select name="cabang_id" class="form-select" required>
+                                    <option value="">Pilih Cabang</option>
+                                    @foreach ($cabang as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-6">
                                 <label for="tanggal_produk" class="form-label">Tanggal</label>
                                 <input type="date" name="tgl" id="tanggal_produk" class="form-control"
@@ -1495,8 +1651,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="qty" class="form-label">Qty</label>
-                                <input type="number" name="qty" id="qty" class="form-control" min="1"
-                                    value="1" required>
+                                <input type="number" name="qty" id="qty" class="form-control"
+                                    min="1" value="1" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="jumlah_produk" class="form-label">Jumlah (Rp)</label>
@@ -1521,6 +1677,7 @@
                                     <th>Service</th>
                                     <th>Qty</th>
                                     <th>Jumlah (Rp)</th>
+                                    <th>CABANG</th>
                                     <th>Input By</th>
                                     <th class="text-center">Aksi</th>
                                 </tr>
@@ -1532,6 +1689,8 @@
                                         <td>{{ $item->service->nm_service ?? ($item->service->nama_service ?? '-') }}</td>
                                         <td>{{ $item->qty }}</td>
                                         <td>{{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
+                                        <td>{{ $item->cabang->nama ?? '-' }}</td>
                                         <td>{{ $item->user->name ?? '-' }}</td>
                                         <td class="text-center">
                                             <form action="{{ route('laporan-keuangan.destroy-produk', $item->id) }}"
@@ -1545,7 +1704,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted">Belum ada data pada periode ini.
+                                        <td colspan="6" class="text-center text-muted">Belum ada data pada periode
+                                            ini.
                                         </td>
                                     </tr>
                                 @endforelse
@@ -1596,7 +1756,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted">Tidak ada data Jasa Layanan pada
+                                        <td colspan="4" class="text-center text-muted">Tidak ada data Jasa Layanan
+                                            pada
                                             periode ini.</td>
                                     </tr>
                                 @endforelse
@@ -1653,7 +1814,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted">Tidak ada data Penjualan Produk
+                                        <td colspan="4" class="text-center text-muted">Tidak ada data Penjualan
+                                            Produk
                                             pada periode ini.</td>
                                     </tr>
                                 @endforelse
@@ -1801,10 +1963,20 @@
                         @csrf
                         <input type="hidden" name="jenis" value="1">
                         <div class="row">
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Cabang</label>
+                                <select name="cabang_id" class="form-select" required>
+                                    <option value="">Pilih Cabang</option>
+                                    @foreach ($cabang as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="mb-3 col-6">
                                 <label for="tgl" class="form-label">Tanggal</label>
-                                <input type="date" class="form-control" name="tgl" value="{{ date('Y-m-d') }}"
-                                    required>
+                                <input type="date" class="form-control" name="tgl"
+                                    value="{{ date('Y-m-d') }}" required>
                             </div>
 
                             <div class="mb-3 col-6">
@@ -1847,6 +2019,8 @@
                                     <th>Tanggal</th>
                                     <th>Pembayaran</th>
                                     <th>Investor</th>
+                                    <th>CABANG</th>
+                                    <th>Cabang</th>
                                     <th>Jumlah</th>
                                     <th>Hapus</th>
                                 </tr>
@@ -1857,6 +2031,8 @@
                                         <td>{{ date('d-m-Y', strtotime($d->tgl)) }}</td>
                                         <td>{{ $d->pembayaran_id == 1 ? 'Cash' : 'Transfer' }}</td>
                                         <td>{{ $d->investor->nm_investor }}</td>
+                                        <td>{{ $d->cabang->nama ?? '-' }}</td>
+                                        <td>{{ $d->cabang->nama ?? '-' }}</td>
                                         <td class="text-end">{{ number_format($d->jumlah, 0, ',', '.') }}</td>
                                         <td class="text-center">
                                             <form action="{{ route('deletePenarikanDana', $d->id) }}" method="POST"
@@ -1894,10 +2070,20 @@
                         @csrf
                         <input type="hidden" name="jenis" value="2">
                         <div class="row">
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Cabang</label>
+                                <select name="cabang_id" class="form-select" required>
+                                    <option value="">Pilih Cabang</option>
+                                    @foreach ($cabang as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="mb-3 col-6">
                                 <label for="tgl" class="form-label">Tanggal</label>
-                                <input type="date" class="form-control" name="tgl" value="{{ date('Y-m-d') }}"
-                                    required>
+                                <input type="date" class="form-control" name="tgl"
+                                    value="{{ date('Y-m-d') }}" required>
                             </div>
 
                             <div class="mb-3 col-6">
@@ -1940,6 +2126,8 @@
                                     <th>Tanggal</th>
                                     <th>Pembayaran</th>
                                     <th>Investor</th>
+                                    <th>CABANG</th>
+                                    <th>Cabang</th>
                                     <th>Jumlah</th>
                                     <th>Hapus</th>
                                 </tr>
@@ -1950,6 +2138,8 @@
                                         <td>{{ date('d-m-Y', strtotime($d->tgl)) }}</td>
                                         <td>{{ $d->pembayaran_id == 1 ? 'Cash' : 'Transfer' }}</td>
                                         <td>{{ $d->investor->nm_investor }}</td>
+                                        <td>{{ $d->cabang->nama ?? '-' }}</td>
+                                        <td>{{ $d->cabang->nama ?? '-' }}</td>
                                         <td class="text-end">{{ number_format($d->jumlah, 0, ',', '.') }}</td>
                                         <td class="text-center">
                                             <form action="{{ route('deletePenarikanDana', $d->id) }}" method="POST"
@@ -1988,6 +2178,16 @@
                         @csrf
                         <input type="hidden" name="jenis" value="4">
                         <div class="row">
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Cabang</label>
+                                <select name="cabang_id" class="form-select" required>
+                                    <option value="">Pilih Cabang</option>
+                                    @foreach ($cabang as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="mb-3 col-6">
                                 <label for="tgl" class="form-label">Tanggal Penarikan</label>
                                 <input type="date" class="form-control" name="tgl"
@@ -2034,6 +2234,8 @@
                                     <th>Tanggal</th>
                                     <th>Pembayaran</th>
                                     <th>Investor</th>
+                                    <th>CABANG</th>
+                                    <th>Cabang</th>
                                     <th>Jumlah</th>
                                     <th>Hapus</th>
                                 </tr>
@@ -2044,6 +2246,8 @@
                                         <td>{{ date('d-m-Y', strtotime($d->tgl)) }}</td>
                                         <td>{{ $d->pembayaran_id == 1 ? 'Cash' : 'Transfer' }}</td>
                                         <td>{{ $d->investor->nm_investor }}</td>
+                                        <td>{{ $d->cabang->nama ?? '-' }}</td>
+                                        <td>{{ $d->cabang->nama ?? '-' }}</td>
                                         <td class="text-end">{{ number_format($d->jumlah, 0, ',', '.') }}</td>
                                         <td class="text-center">
                                             <form action="{{ route('deletePenarikanDana', $d->id) }}" method="POST"
@@ -2154,6 +2358,7 @@
                                         <th>Akun</th>
                                         <th>Jenis<br>Pembayaran</th>
                                         <th>Jumlah</th>
+                                        <th>CABANG</th>
                                         <th>Keterangan</th>
                                         <th>User</th>
                                         <th>Hapus</th>
@@ -2288,6 +2493,7 @@
                                         <th>Akun</th>
                                         <th>Jenis<br>Pembayaran</th>
                                         <th>Jumlah</th>
+                                        <th>CABANG</th>
                                         <th>Keterangan</th>
                                         <th>User</th>
                                         <th>Hapus</th>
@@ -2424,6 +2630,7 @@
                                         <th>Akun</th>
                                         <th>Jenis<br>Pembayaran</th>
                                         <th>Jumlah</th>
+                                        <th>CABANG</th>
                                         <th>Keterangan</th>
                                         <th>User</th>
                                         <th>Hapus</th>
@@ -2560,6 +2767,7 @@
                                         <th>Akun</th>
                                         <th>Jenis<br>Pembayaran</th>
                                         <th>Jumlah</th>
+                                        <th>CABANG</th>
                                         <th>Keterangan</th>
                                         <th>User</th>
                                         <th>Hapus</th>
@@ -2683,6 +2891,7 @@
                                         <th>Cabang</th>
                                         <th>Jenis<br>Pembayaran</th>
                                         <th>Jumlah</th>
+                                        <th>CABANG</th>
                                         <th>Keterangan</th>
                                         <th>User</th>
                                         <th>Hapus</th>
@@ -2805,6 +3014,7 @@
                                         <th>Cabang</th>
                                         <th>Jenis<br>Pembayaran</th>
                                         <th>Jumlah</th>
+                                        <th>CABANG</th>
                                         <th>Keterangan</th>
                                         <th>User</th>
                                         <th>Hapus</th>
@@ -2860,7 +3070,8 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white py-2">
                     <h5 class="modal-title text-white" id="modalDetailAktualTitle">Detail Perhitungan</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-primary py-2 px-3 mb-3 d-flex justify-content-between align-items-center">
@@ -2943,10 +3154,12 @@
                     <!-- Rincian Item Transaksi Periode Ini -->
                     <h6 class="fw-bold mb-2"><i class="bx bx-list-ul me-1"></i> Rincian Transaksi Periode Ini</h6>
                     <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-                        <table class="table table-bordered table-sm align-middle text-nowrap mb-0" id="tableDetailItems">
+                        <table class="table table-bordered table-sm align-middle text-nowrap mb-0"
+                            id="tableDetailItems">
                             <thead class="table-light sticky-top">
                                 <tr>
                                     <th>Tanggal</th>
+                                    <th>CABANG</th>
                                     <th>Keterangan</th>
                                     <th>Metode</th>
                                     <th>Tipe</th>
@@ -3010,7 +3223,8 @@
                     var title = $(this).data('title') || 'Detail Perhitungan';
                     var name = $(this).data('name') || '-';
                     var mode = $(this).data('mode') || 'total';
-                    var period = "{{ date('d M Y', strtotime($startDate)) }} s/d {{ date('d M Y', strtotime($endDate)) }}";
+                    var period =
+                        "{{ date('d M Y', strtotime($startDate)) }} s/d {{ date('d M Y', strtotime($endDate)) }}";
 
                     var pastCash = parseFloat($(this).attr('data-past-cash')) || 0;
                     var pastTransfer = parseFloat($(this).attr('data-past-transfer')) || 0;
@@ -3043,7 +3257,8 @@
                     $('#modalDetailAktualTitle').text(title);
                     $('#modalDetailItemName').text(name);
                     $('#modalDetailPeriod').text('Periode: ' + period);
-                    $('#modalDetailBadgeMode').text(mode === 'saldo' ? 'Aktual Saldo Berjalan' : 'Total Aktual');
+                    $('#modalDetailBadgeMode').text(mode === 'saldo' ? 'Aktual Saldo Berjalan' :
+                    'Total Aktual');
 
                     $('#detailPastCash').text(formatRupiah(pastCash));
                     $('#detailPastTransfer').text(formatRupiah(pastTransfer));
@@ -3062,7 +3277,7 @@
                     if (rawItems) {
                         try {
                             items = typeof rawItems === 'string' ? JSON.parse(rawItems) : rawItems;
-                        } catch(err) {
+                        } catch (err) {
                             console.error(err);
                             items = [];
                         }
@@ -3072,19 +3287,26 @@
                     $tbody.empty();
                     if (items && items.length > 0) {
                         items.forEach(function(it) {
-                            var badgeBayar = it.pembayaran === 'Transfer' ? 'bg-label-info' : 'bg-label-success';
-                            var badgeJenis = it.jenis === 'Masuk' ? 'bg-label-primary' : 'bg-label-danger';
+                            var badgeBayar = it.pembayaran === 'Transfer' ? 'bg-label-info' :
+                                'bg-label-success';
+                            var badgeJenis = it.jenis === 'Masuk' ? 'bg-label-primary' :
+                                'bg-label-danger';
                             var row = '<tr>' +
                                 '<td>' + (it.tgl || '-') + '</td>' +
                                 '<td>' + (it.ket || '-') + '</td>' +
-                                '<td><span class="badge ' + badgeBayar + '">' + (it.pembayaran || 'Cash') + '</span></td>' +
-                                '<td><span class="badge ' + badgeJenis + '">' + (it.jenis || '-') + '</span></td>' +
-                                '<td class="text-end fw-semibold">' + formatRupiah(it.jumlah || 0) + '</td>' +
-                            '</tr>';
+                                '<td><span class="badge ' + badgeBayar + '">' + (it.pembayaran ||
+                                    'Cash') + '</span></td>' +
+                                '<td><span class="badge ' + badgeJenis + '">' + (it.jenis || '-') +
+                                '</span></td>' +
+                                '<td class="text-end fw-semibold">' + formatRupiah(it.jumlah || 0) +
+                                '</td>' +
+                                '</tr>';
                             $tbody.append(row);
                         });
                     } else {
-                        $tbody.append('<tr><td colspan="5" class="text-center text-muted py-3">Tidak ada data rincian transaksi periode ini</td></tr>');
+                        $tbody.append(
+                            '<tr><td colspan="5" class="text-center text-muted py-3">Tidak ada data rincian transaksi periode ini</td></tr>'
+                            );
                     }
 
                     $('#modalDetailAktual').modal('show');
@@ -3134,8 +3356,10 @@
 
             });
         </script>
-    @endsection
+        @include('laporan_keuangan.mutasi_kas_modal')
+@endsection
 
 
 
+    @include('laporan_keuangan.mutasi_kas_modal')
 @endsection

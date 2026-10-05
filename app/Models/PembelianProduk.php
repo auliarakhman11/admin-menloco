@@ -10,7 +10,7 @@ class PembelianProduk extends Model
     use HasFactory;
 
     protected $table = 'pembelian_produk';
-    protected $fillable = ['service_id', 'tgl', 'qty', 'jumlah', 'user_id'];
+    protected $fillable = ['service_id', 'tgl', 'qty', 'jumlah', 'user_id', 'cabang_id'];
 
     public function user()
     {
@@ -20,5 +20,10 @@ class PembelianProduk extends Model
     public function service()
     {
         return $this->belongsTo(Service::class, 'service_id', 'id');
+    }
+
+    public function cabang()
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id', 'id');
     }
 }

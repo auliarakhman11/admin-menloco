@@ -10,10 +10,14 @@ class Pendapatan extends Model
     use HasFactory;
 
     protected $table = 'pendapatan';
-    protected $fillable = ['tgl', 'jumlah', 'ket', 'user_id'];
+    protected $fillable = ['tgl', 'jumlah', 'ket', 'user_id', 'cabang_id'];
 
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+    public function cabang()
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id', 'id');
     }
 }

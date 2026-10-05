@@ -79,6 +79,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/laporan-keuangan/dana/{id}', [LaporanKeuanganController::class, 'destroyDana'])->name('laporan-keuangan.destroy-dana');
         Route::post('/laporan-keuangan/produk', [LaporanKeuanganController::class, 'storeProduk'])->name('laporan-keuangan.store-produk');
         Route::delete('/laporan-keuangan/produk/{id}', [LaporanKeuanganController::class, 'destroyProduk'])->name('laporan-keuangan.destroy-produk');
+        Route::post('storeMutasiKas', [LaporanKeuanganController::class, 'storeMutasiKas'])->name('storeMutasiKas');
+        Route::get('voidMutasiKas/{id}', [LaporanKeuanganController::class, 'voidMutasiKas'])->name('voidMutasiKas');
         Route::post('/penarikan-laba', [PenarikanLabaController::class, 'store'])->name('penarikan.store');
         Route::post('storeSaldoOperasional', [LaporanKeuanganController::class, 'storeSaldoOperasional'])->name('storeSaldoOperasional');
         Route::get('deleteSaldoOperasional/{id}', [LaporanKeuanganController::class, 'deleteSaldoOperasional'])->name('deleteSaldoOperasional');

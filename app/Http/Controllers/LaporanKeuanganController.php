@@ -11,6 +11,7 @@ use App\Models\Div;
 use App\Models\Investor;
 use App\Models\Jurnal;
 use App\Models\Kasbon;
+use App\Models\MutasiKas;
 use App\Models\PembelianProduk;
 use App\Models\PenarikanLaba;
 use App\Models\Pendapatan;
@@ -47,7 +48,7 @@ class LaporanKeuanganController extends Controller
         // 1. PEMASUKAN (Penjualan & Pendapatan)
         // ==========================================
         // Ambil penjualan (jasa & produk) sekaligus beserta relasi service dalam 1 query
-        $penjualanGrouped = Penjualan::where('void', 0)
+        $penjualanGrouped = Penjualan::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereNotNull('service_id')
             ->whereBetween('tgl', [$startDate, $endDate])
             ->whereHas('service', function ($query) {
@@ -59,7 +60,7 @@ class LaporanKeuanganController extends Controller
             ->get();
 
         // Penjualan grouping with pembayaran_id untuk breakdown Cash & Transfer
-        $penjualanByPembayaran = Penjualan::where('void', 0)
+        $penjualanByPembayaran = Penjualan::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereNotNull('service_id')
             ->whereBetween('tgl', [$startDate, $endDate])
             ->whereHas('service', function ($query) {
@@ -84,7 +85,7 @@ class LaporanKeuanganController extends Controller
         $penjualanProdak = $detailPenjualanProdak->sum('total_penjualan');
 
         // Pendapatan DLL (1 query untuk data dan total)
-        $detailPendapatan = Pendapatan::with('user')
+        $detailPendapatan = Pendapatan::with('user')->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->get();
         $pendapatanDll = $detailPendapatan->sum('jumlah');
@@ -95,7 +96,7 @@ class LaporanKeuanganController extends Controller
         // 2. BAGIAN POKOK (Gaji/Komisi Capster & Pembelian Produk)
         // ==========================================
         // Komisi Capster (PenjualanKaryawan)
-        $penjualanKaryawanGrouped = PenjualanKaryawan::where('void', 0)
+        $penjualanKaryawanGrouped = PenjualanKaryawan::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->whereIn('jenis_service', [1, 2])
             ->with('karyawan')
@@ -116,7 +117,7 @@ class LaporanKeuanganController extends Controller
         })->values();
 
         // Kasbon
-        $detailKasbon = Kasbon::where('void', 0)
+        $detailKasbon = Kasbon::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->with('karyawan')
             ->select('karyawan_id', DB::raw('SUM(jumlah) as total_kasbon'))
@@ -125,7 +126,7 @@ class LaporanKeuanganController extends Controller
         $totalKasbon = $detailKasbon->sum('total_kasbon');
 
         // Ambil Gaji
-        $detailAmbilGaji = AmbilGaji::where('void', 0)
+        $detailAmbilGaji = AmbilGaji::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->with('karyawan')
             ->select('karyawan_id', DB::raw('SUM(jumlah) as total_ambil_gaji'))
@@ -168,7 +169,7 @@ class LaporanKeuanganController extends Controller
 
         // Pembelian Produk
         $listServiceProduk = Service::where('jenis', 2)->where('void', 0)->get();
-        $detailProduk = PembelianProduk::with(['service', 'user'])
+        $detailProduk = PembelianProduk::with(['service', 'user'])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->orderBy('tgl', 'desc')
             ->get();
@@ -188,28 +189,28 @@ class LaporanKeuanganController extends Controller
         $pastPengeluaranCapster = 0;
         $pastSaldoGaji = collect();
         if ($hasPast) {
-            $pastGajiCapster = (float)PenjualanKaryawan::where('void', 0)
+            $pastGajiCapster = (float)PenjualanKaryawan::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->whereBetween('tgl', ['2026-08-01', $cutoffDate])
                 ->whereIn('jenis_service', [1, 2])
                 ->sum('harga');
 
-            $pastKasbon = (float)Kasbon::where('void', 0)
+            $pastKasbon = (float)Kasbon::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->whereBetween('tgl', ['2026-08-01', $cutoffDate])
                 ->sum('jumlah');
 
-            $pastAmbilGaji = (float)AmbilGaji::where('void', 0)
+            $pastAmbilGaji = (float)AmbilGaji::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->whereBetween('tgl', ['2026-08-01', $cutoffDate])
                 ->sum('jumlah');
 
             $pastPengeluaranCapster = $pastKasbon + $pastAmbilGaji;
 
-            $pastSaldoGaji = SaldoGaji::whereBetween('tgl', ['2026-08-01', $cutoffDate])
+            $pastSaldoGaji = SaldoGaji::whereBetween('tgl', ['2026-08-01', $cutoffDate])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->select('jenis', 'pembayaran_id', DB::raw('SUM(jumlah) as total'))
                 ->groupBy('jenis', 'pembayaran_id')
                 ->get();
         }
 
-        $allSaldoGaji = SaldoGaji::with(['user', 'cabang'])
+        $allSaldoGaji = SaldoGaji::with(['user', 'cabang'])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->orderBy('tgl', 'desc')
             ->get();
@@ -256,7 +257,7 @@ class LaporanKeuanganController extends Controller
         // ==========================================
         // 3. BAGIAN OPERASIONAL (Jurnal & Saldo Operasional)
         // ==========================================
-        $allJurnal = Jurnal::with(['akun', 'user', 'cabang'])
+        $allJurnal = Jurnal::with(['akun', 'user', 'cabang'])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->where('void', 0)
             ->orderBy('tgl', 'desc')
@@ -265,7 +266,7 @@ class LaporanKeuanganController extends Controller
         $detail_jurnal_masuk = $allJurnal->where('jenis', 1)->values();
         $detail_jurnal_keluar = $allJurnal->where('jenis', 2)->values();
 
-        $allSaldoOperasional = SaldoOperasional::with(['akun', 'user', 'cabang'])
+        $allSaldoOperasional = SaldoOperasional::with(['akun', 'user', 'cabang'])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->orderBy('tgl', 'desc')
             ->get();
@@ -276,13 +277,13 @@ class LaporanKeuanganController extends Controller
         $pastJurnal = collect();
         $pastSaldoOperasional = collect();
         if ($hasPast) {
-            $pastJurnal = Jurnal::where('void', 0)
+            $pastJurnal = Jurnal::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->whereBetween('tgl', ['2026-08-01', $cutoffDate])
                 ->select('akun_id', 'jenis', 'pembayaran_id', DB::raw('SUM(jumlah) as total'))
                 ->groupBy('akun_id', 'jenis', 'pembayaran_id')
                 ->get();
 
-            $pastSaldoOperasional = SaldoOperasional::whereBetween('tgl', ['2026-08-01', $cutoffDate])
+            $pastSaldoOperasional = SaldoOperasional::whereBetween('tgl', ['2026-08-01', $cutoffDate])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->select('akun_id', 'jenis', 'pembayaran_id', DB::raw('SUM(jumlah) as total'))
                 ->groupBy('akun_id', 'jenis', 'pembayaran_id')
                 ->get();
@@ -384,7 +385,7 @@ class LaporanKeuanganController extends Controller
         // ==========================================
         // 4. BAGIAN DIV (DANA)
         // ==========================================
-        $allDana = Dana::with('user')
+        $allDana = Dana::with('user')->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->orderBy('tgl', 'desc')
             ->get();
@@ -397,7 +398,7 @@ class LaporanKeuanganController extends Controller
 
         $pastDana = collect();
         if ($hasPast) {
-            $pastDana = Dana::whereBetween('tgl', ['2026-08-01', $cutoffDate])
+            $pastDana = Dana::whereBetween('tgl', ['2026-08-01', $cutoffDate])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->select('jenis', 'jenis_dana', 'jenis_saldo', 'pembayaran_id', DB::raw('SUM(jumlah) as total'))
                 ->groupBy('jenis', 'jenis_dana', 'jenis_saldo', 'pembayaran_id')
                 ->get();
@@ -497,7 +498,7 @@ class LaporanKeuanganController extends Controller
         $pastPenarikanLaba = collect();
 
         if ($hasPast) {
-            $pastPenjualan = Penjualan::where('void', 0)
+            $pastPenjualan = Penjualan::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->whereNotNull('service_id')
                 ->whereBetween('tgl', ['2026-08-01', $cutoffDate])
                 ->whereHas('service', function ($query) {
@@ -510,18 +511,18 @@ class LaporanKeuanganController extends Controller
 
             $pastJasa = (float)$pastPenjualan->filter(fn($i) => $i->service && $i->service->jenis == 1)->sum('total_penjualan');
             $pastProdak = (float)$pastPenjualan->filter(fn($i) => $i->service && $i->service->jenis == 2)->sum('total_penjualan');
-            $pastPendapatanDll = (float)Pendapatan::whereBetween('tgl', ['2026-08-01', $cutoffDate])->sum('jumlah');
+            $pastPendapatanDll = (float)Pendapatan::whereBetween('tgl', ['2026-08-01', $cutoffDate])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })->sum('jumlah');
             $pastTotalPemasukan = $pastJasa + $pastProdak + $pastPendapatanDll;
 
             $pastTotalPokok = $pastGajiCapster;
             $pastTotalOperasional = (float)$pastJurnal->where('jenis', 1)->sum('total');
             $pastTotalDiv = (float)$pastDana->where('jenis_saldo', 2)->where('jenis_dana', 1)->sum('total');
-            $pastPembelianProduk = (float)PembelianProduk::whereBetween('tgl', ['2026-08-01', $cutoffDate])->sum('jumlah');
+            $pastPembelianProduk = (float)PembelianProduk::whereBetween('tgl', ['2026-08-01', $cutoffDate])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })->sum('jumlah');
 
             $pastTotalLaba = $pastTotalPemasukan - $pastTotalPokok - $pastTotalOperasional - $pastTotalDiv - $pastPembelianProduk;
 
             // Ambil penarikan laba masa lalu
-            $pastPenarikanLaba = PenarikanLaba::whereBetween('tgl', ['2026-08-01', $cutoffDate])
+            $pastPenarikanLaba = PenarikanLaba::whereBetween('tgl', ['2026-08-01', $cutoffDate])->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->select('investor_id', 'jenis', 'pembayaran_id', DB::raw('SUM(jumlah) as total'))
                 ->groupBy('investor_id', 'jenis', 'pembayaran_id')
                 ->get();
@@ -543,7 +544,7 @@ class LaporanKeuanganController extends Controller
             $pastJasaTransfer = (float)$pastPenjualan->filter(fn($i) => $i->service && $i->service->jenis == 1 && $i->pembayaran_id == 2)->sum('total_penjualan');
 
             // Pengeluaran Prodak masa lalu: pembelian produk + komisi produk capster
-            $pastKomisiProduk = (float)PenjualanKaryawan::where('void', 0)
+            $pastKomisiProduk = (float)PenjualanKaryawan::where('void', 0)->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
                 ->whereBetween('tgl', ['2026-08-01', $cutoffDate])
                 ->where('jenis_service', 2)
                 ->sum('harga');
@@ -597,7 +598,7 @@ class LaporanKeuanganController extends Controller
         $pastTotalAktual = $jasaPastNet + $prodakPastNet + $pendapatanPastNet;
 
         // Ambil semua penarikan laba periode ini dalam 1 query
-        $allPenarikanLaba = PenarikanLaba::with('investor')
+        $allPenarikanLaba = PenarikanLaba::with('investor')->when($request->cabang_id && $request->cabang_id != 'all', function ($q) use ($request) { $q->where('cabang_id', $request->cabang_id); })
             ->whereBetween('tgl', [$startDate, $endDate])
             ->get();
 
@@ -795,7 +796,13 @@ class LaporanKeuanganController extends Controller
 
         $title = 'Laporan Keuangan';
 
+        $dataMutasiKas = $this->getRekapMutasiKas($startDate, $endDate, $request->cabang_id, $cutoffDate, $hasPast);
+
+        $dataMutasiKas = $this->getRekapMutasiKas($startDate, $endDate, $request->cabang_id, $cutoffDate, $hasPast);
+
         return view('laporan_keuangan.index', compact(
+            'dataMutasiKas',
+            'dataMutasiKas',
             'startDate',
             'endDate',
             'jasaLayanan',
@@ -877,6 +884,7 @@ class LaporanKeuanganController extends Controller
 
         Pendapatan::create([
             'tgl' => $request->tanggal,
+            'cabang_id' => $request->cabang_id,
             'jumlah' => $request->jumlah,
             'ket' => $request->keterangan,
             'user_id' => Auth::id(),
@@ -904,6 +912,7 @@ class LaporanKeuanganController extends Controller
 
         Dana::create([
             'tgl' => $request->tanggal,
+            'cabang_id' => $request->cabang_id,
             'jenis' => $request->jenis,
             'jumlah' => $request->jumlah,
             'ket' => $request->keterangan,
@@ -927,6 +936,7 @@ class LaporanKeuanganController extends Controller
 
         Dana::create([
             'tgl' => $request->tanggal,
+            'cabang_id' => $request->cabang_id,
             'jenis' => $request->jenis,
             'jumlah' => $request->jumlah,
             'ket' => $request->keterangan,
@@ -949,6 +959,7 @@ class LaporanKeuanganController extends Controller
 
         Dana::create([
             'tgl' => $request->tanggal,
+            'cabang_id' => $request->cabang_id,
             'jenis' => $request->jenis,
             'jumlah' => $request->jumlah,
             'ket' => $request->keterangan,
@@ -971,6 +982,7 @@ class LaporanKeuanganController extends Controller
 
         Dana::create([
             'tgl' => $request->tanggal,
+            'cabang_id' => $request->cabang_id,
             'jenis' => $request->jenis,
             'jumlah' => $request->jumlah,
             'ket' => $request->keterangan,
@@ -1001,6 +1013,7 @@ class LaporanKeuanganController extends Controller
 
         PembelianProduk::create([
             'tgl'    => $request->tgl,
+            'cabang_id' => $request->cabang_id,
             'service_id' => $request->service_id,
             'qty'        => $request->qty,
             'jumlah'     => $request->jumlah,
@@ -1029,6 +1042,7 @@ class LaporanKeuanganController extends Controller
         PenarikanLaba::create([
             'investor_id' => $request->investor_id,
             'tgl'         => $request->tgl,
+            'cabang_id' => $request->cabang_id,
             'jumlah'      => $request->jumlah,
             'jenis'      => $request->jenis,
             'pembayaran_id'      => $request->pembayaran_id,
@@ -1209,5 +1223,81 @@ class LaporanKeuanganController extends Controller
         $item->delete();
 
         return redirect()->back()->with('sukses', 'Data Saldo Gaji berhasil dihapus!');
+    }
+    public function getRekapMutasiKas($startDate, $endDate, $cabang_id, $cutoffDate, $hasPast)
+    {
+        $allMutasiKas = MutasiKas::where('void', 0)
+            ->when($cabang_id && $cabang_id != 'all', function ($q) use ($cabang_id) {
+                $q->where('cabang_id', $cabang_id);
+            })
+            ->whereBetween('tgl', [$startDate, $endDate])
+            ->get();
+
+        $pastMutasiKas = collect();
+        if ($hasPast) {
+            $pastMutasiKas = MutasiKas::where('void', 0)
+                ->when($cabang_id && $cabang_id != 'all', function ($q) use ($cabang_id) {
+                    $q->where('cabang_id', $cabang_id);
+                })
+                ->whereBetween('tgl', ['2026-08-01', $cutoffDate])
+                ->get();
+        }
+
+        $pastMutasiInCash = $pastMutasiKas->where('tujuan_pembayaran_id', 1)->sum('jumlah');
+        $pastMutasiOutCash = $pastMutasiKas->where('sumber_pembayaran_id', 1)->sum('jumlah');
+        $pastMutasiNetCash = $pastMutasiInCash - $pastMutasiOutCash;
+
+        $pastMutasiInTransfer = $pastMutasiKas->where('tujuan_pembayaran_id', 2)->sum('jumlah');
+        $pastMutasiOutTransfer = $pastMutasiKas->where('sumber_pembayaran_id', 2)->sum('jumlah');
+        $pastMutasiNetTransfer = $pastMutasiInTransfer - $pastMutasiOutTransfer;
+
+        $currMutasiInCash = $allMutasiKas->where('tujuan_pembayaran_id', 1)->sum('jumlah');
+        $currMutasiOutCash = $allMutasiKas->where('sumber_pembayaran_id', 1)->sum('jumlah');
+        $currMutasiNetCash = $currMutasiInCash - $currMutasiOutCash;
+
+        $currMutasiInTransfer = $allMutasiKas->where('tujuan_pembayaran_id', 2)->sum('jumlah');
+        $currMutasiOutTransfer = $allMutasiKas->where('sumber_pembayaran_id', 2)->sum('jumlah');
+        $currMutasiNetTransfer = $currMutasiInTransfer - $currMutasiOutTransfer;
+
+        return (object)[
+            'past_net_cash' => $pastMutasiNetCash,
+            'past_net_transfer' => $pastMutasiNetTransfer,
+            'curr_net_cash' => $currMutasiNetCash,
+            'curr_net_transfer' => $currMutasiNetTransfer,
+            'list' => $allMutasiKas
+        ];
+    }
+
+    public function storeMutasiKas(Request $request)
+    {
+        $request->validate([
+            'tgl' => 'required|date',
+            'cabang_id' => 'required',
+            'sumber_pembayaran_id' => 'required|different:tujuan_pembayaran_id',
+            'tujuan_pembayaran_id' => 'required',
+            'jumlah' => 'required|numeric|min:1',
+            'ket' => 'required|string',
+        ]);
+
+        MutasiKas::create([
+            'tgl' => $request->tgl,
+            'cabang_id' => $request->cabang_id,
+            'sumber_pembayaran_id' => $request->sumber_pembayaran_id,
+            'tujuan_pembayaran_id' => $request->tujuan_pembayaran_id,
+            'jumlah' => $request->jumlah,
+            'ket' => $request->ket,
+            'void' => 0,
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()->back()->with('sukses', 'Mutasi Kas berhasil disimpan!');
+    }
+
+    public function voidMutasiKas($id)
+    {
+        $item = MutasiKas::findOrFail($id);
+        $item->update(['void' => 1]);
+
+        return redirect()->back()->with('sukses', 'Mutasi Kas berhasil dihapus/dibatalkan!');
     }
 }
