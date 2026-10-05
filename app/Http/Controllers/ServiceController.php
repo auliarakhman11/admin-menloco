@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Service;
+use App\Models\Cabang;
 use Illuminate\Http\Request;
 
 class ServiceController extends Controller
@@ -11,13 +12,14 @@ class ServiceController extends Controller
     {
         return view('service.index', [
             'title' => 'Service',
-            'service' => Service::where('void', 0)->get(),
+            'service' => Service::with('cabang')->where('void', 0)->get(),
+            'cabang' => Cabang::all(),
         ]);
     }
 
     public function addService(Request $request)
     {
-        Service::create([
+        $service = Service::create([
             'nm_service' => $request->nm_service,
             'jenis' => $request->jenis,
             'harga' => $request->harga,
@@ -25,17 +27,26 @@ class ServiceController extends Controller
             'void' => 0
         ]);
 
+        if ($request->cabang_id) {
+            $service->cabang()->sync($request->cabang_id);
+        }
+
         return redirect()->back()->with('success', 'Data service berhasil dibuat');
     }
 
     public function editService(Request $request)
     {
-        Service::where('id', $request->id)->update([
-            'nm_service' => $request->nm_service,
-            'jenis' => $request->jenis,
-            'harga' => $request->harga,
-            'pembagian' => $request->pembagian,
-        ]);
+        $service = Service::find($request->id);
+        if ($service) {
+            $service->update([
+                'nm_service' => $request->nm_service,
+                'jenis' => $request->jenis,
+                'harga' => $request->harga,
+                'pembagian' => $request->pembagian,
+            ]);
+
+            $service->cabang()->sync($request->cabang_id ?? []);
+        }
 
         return redirect()->back()->with('success', 'Data service berhasil diubah');
     }

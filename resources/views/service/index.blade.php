@@ -35,6 +35,7 @@
                                         <th>Jenis</th>
                                         <th>Harga</th>
                                         <th>Pembagian Hasil</th>
+                                        <th>Akses Cabang</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -57,6 +58,15 @@
                                                     @else
                                                         {{ $d->pembagian }}%
                                                     @endif
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($d->cabang && $d->cabang->count() > 0)
+                                                    @foreach ($d->cabang as $cb)
+                                                        <span class="badge bg-primary mb-1">{{ $cb->nama }}</span>
+                                                    @endforeach
+                                                @else
+                                                    <span class="badge bg-secondary">Belum Ada</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -150,6 +160,25 @@
                                 </div>
                             </div>
 
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label d-block fw-semibold">Akses Cabang</label>
+                                    <div class="row">
+                                        <div class="col-4 mb-1">
+                                            <label><input type="checkbox" class="check_all_cabang"> All</label>
+                                        </div>
+                                        @foreach ($cabang as $c)
+                                            <div class="col-4 mb-1">
+                                                <label>
+                                                    <input type="checkbox" class="cabang_checkbox" value="{{ $c->id }}" name="cabang_id[]">
+                                                    {{ $c->nama }}
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
 
                         </div>
                     </div>
@@ -210,6 +239,30 @@
                                         <label for="">Pembagian Hasil</label>
                                         <input type="text" name="pembagian" class="form-control"
                                             value="{{ $d->pembagian }}" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-2">
+                                    <div class="form-group">
+                                        <label class="form-label d-block fw-semibold">Akses Cabang</label>
+                                        @php
+                                            $selectedCabangIds = $d->cabang ? $d->cabang->pluck('id')->toArray() : [];
+                                            $isAllSelected = count($cabang) > 0 && count($selectedCabangIds) >= count($cabang);
+                                        @endphp
+                                        <div class="row">
+                                            <div class="col-4 mb-1">
+                                                <label><input type="checkbox" class="check_all_cabang" {{ $isAllSelected ? 'checked' : '' }}> All</label>
+                                            </div>
+                                            @foreach ($cabang as $c)
+                                                <div class="col-4 mb-1">
+                                                    <label>
+                                                        <input type="checkbox" class="cabang_checkbox" value="{{ $c->id }}" name="cabang_id[]"
+                                                            {{ in_array($c->id, $selectedCabangIds) ? 'checked' : '' }}>
+                                                        {{ $c->nama }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
 
@@ -274,6 +327,18 @@
             });
             <?php endif; ?>
 
+
+            $(document).on('click', '.check_all_cabang', function() {
+                var modal = $(this).closest('.modal');
+                modal.find('.cabang_checkbox').prop('checked', this.checked);
+            });
+
+            $(document).on('click', '.cabang_checkbox', function() {
+                var modal = $(this).closest('.modal');
+                var total = modal.find('.cabang_checkbox').length;
+                var checked = modal.find('.cabang_checkbox:checked').length;
+                modal.find('.check_all_cabang').prop('checked', total > 0 && total === checked);
+            });
 
             $(document).on('submit', '#form_add_service', function(event) {
                 $('#btn_add_service').attr('disabled', true);

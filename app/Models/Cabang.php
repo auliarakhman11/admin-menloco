@@ -30,4 +30,14 @@ class Cabang extends Model
     {
         return $this->hasMany(SaldoGaji::class, 'cabang_id', 'id');
     }
+
+    public function service()
+    {
+        return $this->belongsToMany(Service::class, 'service_cabang', 'cabang_id', 'service_id')->withTimestamps();
+    }
+
+    public function serviceCabang()
+    {
+        return $this->hasMany(ServiceCabang::class, 'cabang_id', 'id');
+    }
 }
